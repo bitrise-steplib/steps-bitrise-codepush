@@ -4,11 +4,27 @@ description: |-
   Bundles the JavaScript code (and assets) of a React Native project and publishes it as an
   over-the-air (OTA) update to a Bitrise CodePush deployment.
 
-  ### Configuring the Step
+  This is the officially supported way to publish CodePush updates from a Bitrise build. It
+  replaces installing the `bitrise-plugins-codepush-cli` CLI plugin at runtime or shelling out to
+  the `release-management-recipes` reference script: this Step ports the same publishing logic
+  natively, with typed inputs, secret handling, and artifact export.
+
+  ### Current status
+
+  This Step is being built incrementally across a stack of PRs. **This revision bundles the
+  JavaScript project, validates your CodePush app/deployment/token, and exports the built
+  package** — it does not yet upload to CodePush. That lands in follow-up PRs (see the
+  [project brief](https://bitrise.atlassian.net/wiki/spaces/RD/pages/5151653927) for the full
+  scope).
+
+  ### Configuring the Step (current scope)
 
   1. Add the Step to a Workflow after your JS dependencies are installed (or leave
      **Skip dependency install** unchecked and let the Step run the install for you).
   2. Set **Target platform** to `ios` or `android`. Each run only bundles for one platform.
+  3. Set **CodePush app ID** and **Deployment** (name, e.g. `Staging`, or UUID) for the app you're
+     working with.
+  4. Set **Bitrise API token** as a [Secret](https://devcenter.bitrise.io/en/builds/env-vars-and-secrets/adding-and-managing-secrets.html).
 
   The Step auto-detects your project's entry file and Hermes bytecode configuration; overrides
   are available under **Bundling options** if auto-detection doesn't fit your project layout.
@@ -52,6 +68,46 @@ inputs:
     - ios
     - android
     is_required: true
+
+- app_id: $CODEPUSH_APP_ID
+  opts:
+    title: CodePush app ID
+    summary: The Bitrise CodePush app UUID to work with.
+    description: |-
+      The UUID of the Bitrise CodePush app this update targets.
+
+      Find this on your app's CodePush page, or via `CODEPUSH_APP_ID` if you already export it
+      as a Workflow env var.
+    is_required: true
+
+- deployment:
+  opts:
+    title: Deployment
+    summary: The deployment name (e.g. Staging, Production) or UUID to work with.
+    description: |-
+      The name (e.g. `Staging`, `Production`) or UUID of the deployment to work with.
+    is_required: true
+
+- api_token:
+  opts:
+    title: Bitrise API token
+    summary: Personal or Workspace API access token used to authenticate with Bitrise CodePush.
+    description: |-
+      A Bitrise API access token with access to the app above.
+
+      Generate one under **Account Settings > Security** on [bitrise.io](https://app.bitrise.io/me/account/security).
+    is_required: true
+    is_sensitive: true
+
+- server_url: https://api.bitrise.io
+  opts:
+    title: API server URL
+    summary: Base URL of the Bitrise API server.
+    description: |-
+      Base URL of the Bitrise API server. Override only for testing against a non-production
+      environment.
+    category: Advanced
+    is_dont_change_value: true
 
 - project_dir: $BITRISE_SOURCE_DIR
   opts:

@@ -10,11 +10,27 @@ Bundle React Native or Expo JavaScript and push it as an OTA update to Bitrise C
 Bundles the JavaScript code (and assets) of a React Native project and publishes it as an
 over-the-air (OTA) update to a Bitrise CodePush deployment.
 
-### Configuring the Step
+This is the officially supported way to publish CodePush updates from a Bitrise build. It
+replaces installing the `bitrise-plugins-codepush-cli` CLI plugin at runtime or shelling out to
+the `release-management-recipes` reference script: this Step ports the same publishing logic
+natively, with typed inputs, secret handling, and artifact export.
+
+### Current status
+
+This Step is being built incrementally across a stack of PRs. **This revision bundles the
+JavaScript project, validates your CodePush app/deployment/token, and exports the built
+package** — it does not yet upload to CodePush. That lands in follow-up PRs (see the
+[project brief](https://bitrise.atlassian.net/wiki/spaces/RD/pages/5151653927) for the full
+scope).
+
+### Configuring the Step (current scope)
 
 1. Add the Step to a Workflow after your JS dependencies are installed (or leave
    **Skip dependency install** unchecked and let the Step run the install for you).
 2. Set **Target platform** to `ios` or `android`. Each run only bundles for one platform.
+3. Set **CodePush app ID** and **Deployment** (name, e.g. `Staging`, or UUID) for the app you're
+   working with.
+4. Set **Bitrise API token** as a [Secret](https://devcenter.bitrise.io/en/builds/env-vars-and-secrets/adding-and-managing-secrets.html).
 
 The Step auto-detects your project's entry file and Hermes bytecode configuration; overrides
 are available under **Bundling options** if auto-detection doesn't fit your project layout.
@@ -45,6 +61,10 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
 | `platform` | The platform the JavaScript bundle and update target.  Each run of the Step bundles for a single platform (the bundle filename and entry file differ between iOS and Android). | required | `ios` |
+| `app_id` | The UUID of the Bitrise CodePush app this update targets.  Find this on your app's CodePush page, or via `CODEPUSH_APP_ID` if you already export it as a Workflow env var. | required | `$CODEPUSH_APP_ID` |
+| `deployment` | The name (e.g. `Staging`, `Production`) or UUID of the deployment to work with. | required |  |
+| `api_token` | A Bitrise API access token with access to the app above.  Generate one under **Account Settings > Security** on [bitrise.io](https://app.bitrise.io/me/account/security). | required, sensitive |  |
+| `server_url` | Base URL of the Bitrise API server. Override only for testing against a non-production environment. |  | `https://api.bitrise.io` |
 | `project_dir` | The root directory of the React Native or Expo project to bundle, containing its `package.json`. |  | `$BITRISE_SOURCE_DIR` |
 | `entry_file` | Path to the JavaScript entry file, relative to **Project directory**.  Leave empty to auto-detect (`index.<platform>.js`, then `index.js`, then the `main` field in `package.json`). |  |  |
 | `hermes` | Controls whether the JavaScript bundle is compiled to Hermes bytecode after bundling.  - `auto`: detect from the project's `android/app/build.gradle` / `ios/Podfile`, falling   back to "enabled" for React Native >= 0.70 (where Hermes is the default engine) if no   explicit setting is found. - `on`: always compile to Hermes bytecode. - `off`: never compile to Hermes bytecode.  The compiled bundle must match the Hermes/JSC engine the native app was built with, or the update will fail to load on-device. |  | `auto` |

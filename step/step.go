@@ -1,18 +1,29 @@
 package step
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/bitrise-io/go-steputils/v2/export"
 	"github.com/bitrise-io/go-steputils/v2/stepconf"
 	"github.com/bitrise-io/go-utils/v2/log"
 
 	"github.com/bitrise-steplib/steps-bitrise-codepush/internal/bundler"
+	"github.com/bitrise-steplib/steps-bitrise-codepush/internal/codepush"
 	ziputil "github.com/bitrise-steplib/steps-bitrise-codepush/internal/zip"
 )
 
 const outputPackagePath = "BITRISE_CODEPUSH_PACKAGE_PATH"
+
+const defaultServerURL = "https://api.bitrise.io"
+
+const codePushAPIPath = "/release-management/v2/code-push/v1"
+
+// stepUserAgentVersion identifies this step's requests to the CodePush API. It is cosmetic
+// (server-side logging/debugging only) and intentionally not wired to the step's own semver.
+const stepUserAgentVersion = "1"
 
 type Config struct {
 	ProjectDir            string `env:"project_dir,dir"`
@@ -21,6 +32,11 @@ type Config struct {
 	BundleName            string `env:"bundle_name"`
 	HermesMode            string `env:"hermes,opt[auto,on,off]"`
 	SkipDependencyInstall bool   `env:"skip_dependency_install,opt[true,false]"`
+
+	AppID      string          `env:"app_id,required"`
+	Deployment string          `env:"deployment,required"`
+	APIToken   stepconf.Secret `env:"api_token,required"`
+	ServerURL  string          `env:"server_url"`
 
 	DeployDir string `env:"BITRISE_DEPLOY_DIR,dir"`
 
@@ -56,10 +72,28 @@ func (s Step) ProcessConfig() (Config, error) {
 	stepconf.Print(cfg)
 	s.logger.Println()
 
+	if cfg.ServerURL == "" {
+		cfg.ServerURL = defaultServerURL
+	}
+	cfg.ServerURL = strings.TrimRight(cfg.ServerURL, "/")
+
 	return cfg, nil
 }
 
+// Run resolves and validates the app/deployment/token against the CodePush API, then bundles the
+// JavaScript project and packages it into a zip. Resolution runs first so a bad credential or
+// deployment name fails fast, before spending time bundling.
 func (s Step) Run(cfg Config) (Result, error) {
+	ctx := context.Background()
+
+	client := codepush.NewHTTPClient(cfg.ServerURL+codePushAPIPath, string(cfg.APIToken), stepUserAgentVersion)
+
+	s.logger.Infof("Resolving CodePush app and deployment")
+	if _, err := codepush.ResolveDeployment(ctx, client, cfg.AppID, cfg.Deployment, s.logger); err != nil {
+		return Result{}, fmt.Errorf("resolving deployment: %w", err)
+	}
+	s.logger.Donef("App and deployment resolved")
+
 	bundleOpts := &bundler.BundleOptions{
 		Platform:    bundler.Platform(cfg.Platform),
 		EntryFile:   cfg.EntryFile,
@@ -72,6 +106,7 @@ func (s Step) Run(cfg Config) (Result, error) {
 		SkipInstall: cfg.SkipDependencyInstall,
 	}
 
+	s.logger.Println()
 	s.logger.Infof("Bundling JavaScript")
 	bundleResult, err := bundler.Run(bundleOpts, s.logger)
 	if err != nil {
