@@ -17,7 +17,7 @@ workflows:
   #   bitrise run sample
   sample:
     envs:
-    - TEST_REPO_URL: https://github.com/bitrise-io/release-management-code-push-demo
+    - TEST_REPO_URL: https://github.com/naveen-bitrise/Bitrise-ReactNative-CodePush
     - TEST_REPO_BRANCH: main
     steps:
     - script:
@@ -35,7 +35,7 @@ workflows:
     - path::./:
         title: Test current Step
         inputs:
-        - project_dir: ./_tmp/react_native
+        - project_dir: ./_tmp
         - platform: android
         - app_id: $CODEPUSH_APP_ID
         - deployment: $CODEPUSH_DEPLOYMENT
