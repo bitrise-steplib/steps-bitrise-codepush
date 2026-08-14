@@ -44,6 +44,13 @@ const (
 	defaultDisabled  = false
 )
 
+// This layer of the stack hardcodes these; PR 4 turns them into inputs.
+const (
+	defaultRollout   = 100.0
+	defaultMandatory = false
+	defaultDisabled  = false
+)
+
 type Config struct {
 	ProjectDir            string `env:"project_dir,dir"`
 	Platform              string `env:"platform,opt[ios,android]"`
