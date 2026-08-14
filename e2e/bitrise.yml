@@ -36,6 +36,16 @@ workflows:
             #!/usr/bin/env bash
             set -ex
 
+            if [ -z "$BITRISE_CODEPUSH_UPDATE_ID" ]; then
+              echo "BITRISE_CODEPUSH_UPDATE_ID is not set"
+              exit 1
+            fi
+
+            if [ "$BITRISE_CODEPUSH_APP_VERSION" != "1.0.0" ]; then
+              echo "BITRISE_CODEPUSH_APP_VERSION expected 1.0.0, got: $BITRISE_CODEPUSH_APP_VERSION"
+              exit 1
+            fi
+
             if [ -z "$BITRISE_CODEPUSH_PACKAGE_PATH" ] || [ ! -f "$BITRISE_CODEPUSH_PACKAGE_PATH" ]; then
               echo "BITRISE_CODEPUSH_PACKAGE_PATH does not point to an existing file: $BITRISE_CODEPUSH_PACKAGE_PATH"
               exit 1
@@ -49,13 +59,13 @@ workflows:
                 ;;
             esac
 
-            echo "Outputs OK: package=$BITRISE_CODEPUSH_PACKAGE_PATH"
+            echo "Outputs OK: update_id=$BITRISE_CODEPUSH_UPDATE_ID package=$BITRISE_CODEPUSH_PACKAGE_PATH"
 
-  test_resolve_and_bundle_android:
+  test_push_android:
     description: |-
-      Resolve app_id/deployment/api_token against the real CodePush API, then bundle for Android
-      (auto-detecting Hermes and the package manager) and export the package under
-      $BITRISE_DEPLOY_DIR.
+      Push an Android update from a plain React Native project, auto-detecting Hermes and the
+      package manager. Covers the happy path: resolve, bundle, upload, poll, export outputs, and
+      export the built package under $BITRISE_DEPLOY_DIR.
     before_run:
     - _setup
     steps:
@@ -66,15 +76,15 @@ workflows:
         - platform: android
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - app_version: 1.0.0
         - api_token: $CODEPUSH_STEP_TEST_WAT
     after_run:
     - _check_outputs
 
-  test_resolve_and_bundle_ios_hermes_off:
+  test_push_ios_hermes_off:
     description: |-
-      Same as test_resolve_and_bundle_android but for iOS, with Hermes explicitly
-      disabled — exercises the hermes: off path (skips hermesc entirely) rather than just
-      auto-detection.
+      Same as test_push_android but for iOS, with Hermes explicitly disabled — exercises the
+      hermes: off path (skips hermesc entirely) rather than just auto-detection.
     before_run:
     - _setup
     steps:
@@ -86,6 +96,7 @@ workflows:
         - hermes: "off"
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - app_version: 1.0.0
         - api_token: $CODEPUSH_STEP_TEST_WAT
     after_run:
     - _check_outputs

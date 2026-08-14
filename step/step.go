@@ -13,10 +13,13 @@ import (
 
 	"github.com/bitrise-steplib/steps-bitrise-codepush/internal/bundler"
 	"github.com/bitrise-steplib/steps-bitrise-codepush/internal/codepush"
-	ziputil "github.com/bitrise-steplib/steps-bitrise-codepush/internal/zip"
 )
 
-const outputPackagePath = "BITRISE_CODEPUSH_PACKAGE_PATH"
+const (
+	outputUpdateID    = "BITRISE_CODEPUSH_UPDATE_ID"
+	outputAppVersion  = "BITRISE_CODEPUSH_APP_VERSION"
+	outputPackagePath = "BITRISE_CODEPUSH_PACKAGE_PATH"
+)
 
 const defaultServerURL = "https://api.bitrise.io"
 
@@ -35,6 +38,13 @@ func stepUserAgentVersion() string {
 	return "unknown"
 }
 
+// This layer of the stack hardcodes these; PR 4 turns them into inputs.
+const (
+	defaultRollout   = 100.0
+	defaultMandatory = false
+	defaultDisabled  = false
+)
+
 type Config struct {
 	ProjectDir            string `env:"project_dir,dir"`
 	Platform              string `env:"platform,opt[ios,android]"`
@@ -48,12 +58,17 @@ type Config struct {
 	APIToken   stepconf.Secret `env:"api_token,required"`
 	ServerURL  string          `env:"server_url"`
 
+	AppVersion string `env:"app_version,required"`
+
 	DeployDir string `env:"BITRISE_DEPLOY_DIR,dir"`
 
 	VerboseLog bool `env:"verbose_log,opt[true,false]"`
 }
 
 type Result struct {
+	UpdateID    string
+	AppVersion  string
+	Status      string
 	PackagePath string
 	DeployDir   string
 }
@@ -90,6 +105,8 @@ func (s Step) ProcessConfig() (Config, error) {
 	return cfg, nil
 }
 
+// ResolveDeployment runs before bundling so a bad credential/deployment fails fast; codepush.Push
+// resolves it again internally as part of its upload flow, which is harmless (one extra API call).
 func (s Step) Run(cfg Config) (Result, error) {
 	ctx := context.Background()
 
@@ -124,14 +141,28 @@ func (s Step) Run(cfg Config) (Result, error) {
 		s.logger.Printf("Hermes bytecode compilation applied")
 	}
 
-	s.logger.Infof("Packaging bundle")
-	zipPath, err := ziputil.Directory(bundleResult.OutputDir)
+	s.logger.Println()
+	s.logger.Infof("Pushing update to CodePush")
+	pushResult, err := codepush.Push(ctx, client, &codepush.PushOptions{
+		AppID:        cfg.AppID,
+		DeploymentID: cfg.Deployment,
+		Token:        string(cfg.APIToken),
+		AppVersion:   cfg.AppVersion,
+		Mandatory:    defaultMandatory,
+		Disabled:     defaultDisabled,
+		Rollout:      defaultRollout,
+		BundlePath:   bundleResult.OutputDir,
+	}, s.logger)
 	if err != nil {
-		return Result{}, fmt.Errorf("packaging bundle: %w", err)
+		return Result{}, fmt.Errorf("push failed: %w", err)
 	}
+	s.logger.Donef("Push successful (update: %s, status: %s)", pushResult.UpdateID, pushResult.Status)
 
 	return Result{
-		PackagePath: zipPath,
+		UpdateID:    pushResult.UpdateID,
+		AppVersion:  pushResult.AppVersion,
+		Status:      pushResult.Status,
+		PackagePath: pushResult.PackagePath,
 		DeployDir:   cfg.DeployDir,
 	}, nil
 }
@@ -139,6 +170,13 @@ func (s Step) Run(cfg Config) (Result, error) {
 // The package is copied under $BITRISE_DEPLOY_DIR so a subsequent "Deploy to Bitrise.io" step
 // picks it up automatically.
 func (s Step) ExportOutputs(result Result) error {
+	if err := s.exporter.ExportOutput(outputUpdateID, result.UpdateID); err != nil {
+		return fmt.Errorf("exporting %s: %w", outputUpdateID, err)
+	}
+	if err := s.exporter.ExportOutput(outputAppVersion, result.AppVersion); err != nil {
+		return fmt.Errorf("exporting %s: %w", outputAppVersion, err)
+	}
+
 	dest := filepath.Join(result.DeployDir, filepath.Base(result.PackagePath))
 	if err := s.exporter.ExportOutputFile(outputPackagePath, result.PackagePath, dest); err != nil {
 		return fmt.Errorf("exporting %s: %w", outputPackagePath, err)
