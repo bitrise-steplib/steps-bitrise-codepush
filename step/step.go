@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime/debug"
+	"strconv"
 	"strings"
 
 	"github.com/bitrise-io/go-steputils/v2/export"
@@ -37,20 +38,6 @@ func stepUserAgentVersion() string {
 	return "unknown"
 }
 
-// This layer of the stack hardcodes these; PR 4 turns them into inputs.
-const (
-	defaultRollout   = 100.0
-	defaultMandatory = false
-	defaultDisabled  = false
-)
-
-// This layer of the stack hardcodes these; PR 4 turns them into inputs.
-const (
-	defaultRollout   = 100.0
-	defaultMandatory = false
-	defaultDisabled  = false
-)
-
 type Config struct {
 	ProjectDir            string `env:"project_dir,dir"`
 	Platform              string `env:"platform,opt[ios,android]"`
@@ -64,7 +51,11 @@ type Config struct {
 	APIToken   stepconf.Secret `env:"api_token,required"`
 	ServerURL  string          `env:"server_url"`
 
-	AppVersion string `env:"app_version,required"`
+	AppVersion          string `env:"app_version,required"`
+	Description         string `env:"description"`
+	RolloutPercentage   string `env:"rollout_percentage"`
+	Mandatory           bool   `env:"mandatory,opt[true,false]"`
+	DisabledAfterUpload bool   `env:"disabled_after_upload,opt[true,false]"`
 
 	DeployDir string `env:"BITRISE_DEPLOY_DIR,dir"`
 
@@ -101,6 +92,13 @@ func (s Step) ProcessConfig() (Config, error) {
 	s.logger.EnableDebugLog(cfg.VerboseLog)
 	stepconf.Print(cfg)
 	s.logger.Println()
+
+	if cfg.RolloutPercentage == "" {
+		cfg.RolloutPercentage = "100"
+	}
+	if rollout, err := strconv.ParseFloat(cfg.RolloutPercentage, 64); err != nil || rollout < 0 || rollout > 100 {
+		return Config{}, fmt.Errorf("rollout_percentage must be a number between 0 and 100, got %q", cfg.RolloutPercentage)
+	}
 
 	if cfg.ServerURL == "" {
 		cfg.ServerURL = defaultServerURL
@@ -146,6 +144,9 @@ func (s Step) Run(cfg Config) (Result, error) {
 		s.logger.Printf("Hermes bytecode compilation applied")
 	}
 
+	// Already validated in ProcessConfig.
+	rollout, _ := strconv.ParseFloat(cfg.RolloutPercentage, 64)
+
 	s.logger.Println()
 	s.logger.Infof("Pushing update to CodePush")
 	pushResult, err := codepush.Push(ctx, client, &codepush.PushOptions{
@@ -153,9 +154,10 @@ func (s Step) Run(cfg Config) (Result, error) {
 		DeploymentID: cfg.Deployment,
 		Token:        string(cfg.APIToken),
 		AppVersion:   cfg.AppVersion,
-		Mandatory:    defaultMandatory,
-		Disabled:     defaultDisabled,
-		Rollout:      defaultRollout,
+		Description:  cfg.Description,
+		Mandatory:    cfg.Mandatory,
+		Disabled:     cfg.DisabledAfterUpload,
+		Rollout:      rollout,
 		BundlePath:   bundleResult.OutputDir,
 	}, s.logger)
 	if err != nil {

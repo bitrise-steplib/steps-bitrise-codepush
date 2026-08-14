@@ -95,3 +95,24 @@ workflows:
         - api_token: $CODEPUSH_STEP_TEST_WAT
     after_run:
     - _check_outputs
+
+  manual_test_push_ios_mandatory_disabled:
+    description: |-
+      Push an iOS update with mandatory=true and disabled_after_upload=true, verifying those
+      flags don't break the upload/poll flow. Requires real credentials — see the comment above.
+    before_run:
+    - _setup
+    steps:
+    - path::./:
+        title: Run Bitrise CodePush
+        inputs:
+        - project_dir: ./_tmp
+        - platform: ios
+        - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
+        - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - app_version: 1.0.0
+        - api_token: $BITRISE_TOKEN
+        - mandatory: "true"
+        - disabled_after_upload: "true"
+    after_run:
+    - _check_outputs
