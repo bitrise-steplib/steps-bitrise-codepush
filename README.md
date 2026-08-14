@@ -2,7 +2,7 @@
 
 [![Step changelog](https://shields.io/github/v/release/bitrise-steplib/steps-bitrise-codepush?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/steps-bitrise-codepush/releases)
 
-Bundle your React Native or Expo JavaScript code and push it as an over-the-air update to Bitrise CodePush.
+Bundle React Native or Expo JavaScript and push it as an OTA update to Bitrise CodePush.
 
 <details>
 <summary>Description</summary>
@@ -63,7 +63,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
-| `platform` | The platform the JavaScript bundle and update target.  Each run of the Step bundles and publishes for a single platform (the bundle filename and entry file differ between iOS and Android, and a CodePush update carries one bundle). To publish updates for both iOS and Android, add the Step twice in your Workflow, once per platform. | required |  |
+| `platform` | The platform the JavaScript bundle and update target.  Each run of the Step bundles and publishes for a single platform (the bundle filename and entry file differ between iOS and Android, and a CodePush update carries one bundle). To publish updates for both iOS and Android, add the Step twice in your Workflow, once per platform. | required | `ios` |
 | `app_id` | The UUID of the Bitrise CodePush app to publish this update to.  Find this on your app's CodePush page, or via `CODEPUSH_APP_ID` if you already export it as a Workflow env var. | required | `$CODEPUSH_APP_ID` |
 | `deployment` | The name (e.g. `Staging`, `Production`) or UUID of the deployment to publish the update to. | required |  |
 | `app_version` | The target native binary version for this update, e.g. `1.2.0`.  Devices only receive this update if their installed native app version matches. This is usually your app's marketing/short version string, not the build number. | required |  |

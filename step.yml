@@ -1,5 +1,5 @@
 title: Bitrise CodePush
-summary: Bundle your React Native or Expo JavaScript code and push it as an over-the-air update to Bitrise CodePush.
+summary: Bundle React Native or Expo JavaScript and push it as an OTA update to Bitrise CodePush.
 description: |-
   Bundles the JavaScript code (and assets) of a React Native or Expo project and publishes it as
   an over-the-air (OTA) update to a [Bitrise CodePush](https://bitrise.io) deployment, so devices
@@ -47,10 +47,6 @@ website: https://github.com/bitrise-steplib/steps-bitrise-codepush
 source_code_url: https://github.com/bitrise-steplib/steps-bitrise-codepush
 support_url: https://github.com/bitrise-steplib/steps-bitrise-codepush/issues
 
-host_os_tags:
-- osx-10.10
-- linux
-
 project_type_tags:
 - react-native
 
@@ -67,7 +63,7 @@ toolkit:
 
 inputs:
 # Target
-- platform:
+- platform: ios
   opts:
     title: Target platform
     summary: The platform the update targets.
