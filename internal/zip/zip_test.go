@@ -15,7 +15,7 @@ func TestDirectory(t *testing.T) {
 	t.Run("zips files correctly", func(t *testing.T) {
 		dir := t.TempDir()
 		srcDir := filepath.Join(dir, "bundle")
-		os.Mkdir(srcDir, 0o755)
+		require.NoError(t, os.Mkdir(srcDir, 0o755))
 
 		writeFile(t, filepath.Join(srcDir, "main.jsbundle"), "bundle content")
 		writeFile(t, filepath.Join(srcDir, "main.jsbundle.map"), "sourcemap content")
@@ -36,7 +36,7 @@ func TestDirectory(t *testing.T) {
 	t.Run("preserves nested directory structure", func(t *testing.T) {
 		dir := t.TempDir()
 		srcDir := filepath.Join(dir, "bundle")
-		os.MkdirAll(filepath.Join(srcDir, "assets", "images"), 0o755)
+		require.NoError(t, os.MkdirAll(filepath.Join(srcDir, "assets", "images"), 0o755))
 
 		writeFile(t, filepath.Join(srcDir, "index.js"), "code")
 		writeFile(t, filepath.Join(srcDir, "assets", "images", "logo.png"), "image data")
@@ -55,7 +55,7 @@ func TestDirectory(t *testing.T) {
 	t.Run("preserves file contents", func(t *testing.T) {
 		dir := t.TempDir()
 		srcDir := filepath.Join(dir, "bundle")
-		os.Mkdir(srcDir, 0o755)
+		require.NoError(t, os.Mkdir(srcDir, 0o755))
 
 		content := "console.log('hello world')"
 		writeFile(t, filepath.Join(srcDir, "app.js"), content)
@@ -100,7 +100,7 @@ func TestDirectory(t *testing.T) {
 	t.Run("empty directory", func(t *testing.T) {
 		dir := t.TempDir()
 		srcDir := filepath.Join(dir, "empty")
-		os.Mkdir(srcDir, 0o755)
+		require.NoError(t, os.Mkdir(srcDir, 0o755))
 
 		zipPath, err := Directory(srcDir)
 		require.NoError(t, err)

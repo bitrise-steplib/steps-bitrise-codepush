@@ -23,8 +23,8 @@ func TestRunWithExecutor(t *testing.T) {
 			// Create the expected bundle output when npx is called
 			for i, arg := range args {
 				if arg == "--bundle-output" && i+1 < len(args) {
-					os.MkdirAll(filepath.Dir(args[i+1]), 0o755)
-					os.WriteFile(args[i+1], []byte("bundle"), 0o644)
+					require.NoError(t, os.MkdirAll(filepath.Dir(args[i+1]), 0o755))
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bundle"), 0o644))
 				}
 			}
 		}
@@ -57,8 +57,8 @@ func TestRunWithExecutor(t *testing.T) {
 			// Simulate expo export creating a bundle file
 			for i, arg := range args {
 				if arg == "--output-dir" && i+1 < len(args) {
-					os.MkdirAll(args[i+1], 0o755)
-					os.WriteFile(filepath.Join(args[i+1], "bundle.js"), []byte("expo bundle"), 0o644)
+					require.NoError(t, os.MkdirAll(args[i+1], 0o755))
+					require.NoError(t, os.WriteFile(filepath.Join(args[i+1], "bundle.js"), []byte("expo bundle"), 0o644))
 				}
 			}
 		}
@@ -87,8 +87,8 @@ func TestRunWithExecutor(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "--bundle-output" && i+1 < len(args) {
-					os.MkdirAll(filepath.Dir(args[i+1]), 0o755)
-					os.WriteFile(args[i+1], []byte("bundle"), 0o644)
+					require.NoError(t, os.MkdirAll(filepath.Dir(args[i+1]), 0o755))
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bundle"), 0o644))
 				}
 			}
 		}
@@ -132,8 +132,8 @@ func TestRunWithExecutor(t *testing.T) {
 			capturedArgs = args
 			for i, arg := range args {
 				if arg == "--bundle-output" && i+1 < len(args) {
-					os.MkdirAll(filepath.Dir(args[i+1]), 0o755)
-					os.WriteFile(args[i+1], []byte("bundle"), 0o644)
+					require.NoError(t, os.MkdirAll(filepath.Dir(args[i+1]), 0o755))
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bundle"), 0o644))
 				}
 			}
 		}
@@ -181,8 +181,8 @@ func TestRunWithExecutor(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "--bundle-output" && i+1 < len(args) {
-					os.MkdirAll(filepath.Dir(args[i+1]), 0o755)
-					os.WriteFile(args[i+1], []byte("bundle"), 0o644)
+					require.NoError(t, os.MkdirAll(filepath.Dir(args[i+1]), 0o755))
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bundle"), 0o644))
 				}
 			}
 		}
@@ -212,8 +212,8 @@ func TestRunWithExecutor(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "--bundle-output" && i+1 < len(args) {
-					os.MkdirAll(filepath.Dir(args[i+1]), 0o755)
-					os.WriteFile(args[i+1], []byte("bundle"), 0o644)
+					require.NoError(t, os.MkdirAll(filepath.Dir(args[i+1]), 0o755))
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bundle"), 0o644))
 				}
 			}
 		}
@@ -243,8 +243,8 @@ func TestRunWithExecutor(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "--bundle-output" && i+1 < len(args) {
-					os.MkdirAll(filepath.Dir(args[i+1]), 0o755)
-					os.WriteFile(args[i+1], []byte("bundle"), 0o644)
+					require.NoError(t, os.MkdirAll(filepath.Dir(args[i+1]), 0o755))
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bundle"), 0o644))
 				}
 			}
 		}
@@ -318,7 +318,7 @@ func TestCompileWithHermes(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "-out" && i+1 < len(args) {
-					os.WriteFile(args[i+1], []byte("bytecode"), 0o644)
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bytecode"), 0o644))
 				}
 			}
 		}

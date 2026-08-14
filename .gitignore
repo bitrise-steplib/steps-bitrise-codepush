@@ -13,6 +13,10 @@ _tmp
 /steps-bitrise-codepush
 *.test
 
+# Locally-downloaded golangci-lint binary (installed by its own install.sh, matches whatever CI
+# happens to pin — not something to commit)
+/bin/
+
 # Local sample/e2e bundling output (DefaultOutputDir is relative, so running the Step locally
 # via `bitrise run sample` / `bitrise run --config e2e/bitrise.yml ...` from the repo root leaves
 # these as siblings of this file)

@@ -81,7 +81,7 @@ workflows:
         - platform: android
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
-        - app_version: "1.0.0"
+        - app_version: 1.0.0
         - api_token: $BITRISE_TOKEN
         - rollout_percentage: "100"
     after_run:
@@ -101,7 +101,7 @@ workflows:
         - platform: ios
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
-        - app_version: "1.0.0"
+        - app_version: 1.0.0
         - api_token: $BITRISE_TOKEN
         - mandatory: "true"
         - disabled_after_upload: "true"
@@ -127,7 +127,7 @@ workflows:
         - platform: android
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
-        - app_version: "1.0.0"
+        - app_version: 1.0.0
         - api_token: $BITRISE_TOKEN
     after_run:
     - _check_outputs
@@ -147,7 +147,7 @@ workflows:
         - platform: ios
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
-        - app_version: "1.0.0"
+        - app_version: 1.0.0
         - api_token: $BITRISE_TOKEN
     after_run:
     - _check_outputs

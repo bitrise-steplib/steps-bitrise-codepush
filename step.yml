@@ -66,209 +66,209 @@ toolkit:
     package_name: github.com/bitrise-steplib/steps-bitrise-codepush
 
 inputs:
-  # Target
-  - platform:
-    opts:
-      title: Target platform
-      summary: The platform the update targets.
-      description: |-
-        The platform the JavaScript bundle and update target.
+# Target
+- platform:
+  opts:
+    title: Target platform
+    summary: The platform the update targets.
+    description: |-
+      The platform the JavaScript bundle and update target.
 
-        Each run of the Step bundles and publishes for a single platform (the bundle filename and
-        entry file differ between iOS and Android, and a CodePush update carries one bundle). To
-        publish updates for both iOS and Android, add the Step twice in your Workflow, once per
-        platform.
-      value_options:
-      - ios
-      - android
-      is_required: true
+      Each run of the Step bundles and publishes for a single platform (the bundle filename and
+      entry file differ between iOS and Android, and a CodePush update carries one bundle). To
+      publish updates for both iOS and Android, add the Step twice in your Workflow, once per
+      platform.
+    value_options:
+    - ios
+    - android
+    is_required: true
 
-  - app_id: $CODEPUSH_APP_ID
-    opts:
-      title: CodePush app ID
-      summary: The Bitrise CodePush app UUID to publish to.
-      description: |-
-        The UUID of the Bitrise CodePush app to publish this update to.
+- app_id: $CODEPUSH_APP_ID
+  opts:
+    title: CodePush app ID
+    summary: The Bitrise CodePush app UUID to publish to.
+    description: |-
+      The UUID of the Bitrise CodePush app to publish this update to.
 
-        Find this on your app's CodePush page, or via `CODEPUSH_APP_ID` if you already export it
-        as a Workflow env var.
-      is_required: true
+      Find this on your app's CodePush page, or via `CODEPUSH_APP_ID` if you already export it
+      as a Workflow env var.
+    is_required: true
 
-  - deployment:
-    opts:
-      title: Deployment
-      summary: The deployment name (e.g. Staging, Production) or UUID to push to.
-      description: |-
-        The name (e.g. `Staging`, `Production`) or UUID of the deployment to publish the update to.
-      is_required: true
+- deployment:
+  opts:
+    title: Deployment
+    summary: The deployment name (e.g. Staging, Production) or UUID to push to.
+    description: |-
+      The name (e.g. `Staging`, `Production`) or UUID of the deployment to publish the update to.
+    is_required: true
 
-  - app_version:
-    opts:
-      title: Target app version
-      summary: The native app version this update targets (e.g. 1.2.0).
-      description: |-
-        The target native binary version for this update, e.g. `1.2.0`.
+- app_version:
+  opts:
+    title: Target app version
+    summary: The native app version this update targets (e.g. 1.2.0).
+    description: |-
+      The target native binary version for this update, e.g. `1.2.0`.
 
-        Devices only receive this update if their installed native app version matches. This is
-        usually your app's marketing/short version string, not the build number.
-      is_required: true
+      Devices only receive this update if their installed native app version matches. This is
+      usually your app's marketing/short version string, not the build number.
+    is_required: true
 
-  # Auth
-  - api_token:
-    opts:
-      title: Bitrise API token
-      summary: Personal or Workspace API access token used to authenticate with Bitrise CodePush.
-      description: |-
-        A Bitrise API access token with access to the app the update is being published to.
+# Auth
+- api_token:
+  opts:
+    title: Bitrise API token
+    summary: Personal or Workspace API access token used to authenticate with Bitrise CodePush.
+    description: |-
+      A Bitrise API access token with access to the app the update is being published to.
 
-        Generate one under **Account Settings > Security** on [bitrise.io](https://app.bitrise.io/me/account/security).
-      is_required: true
-      is_sensitive: true
+      Generate one under **Account Settings > Security** on [bitrise.io](https://app.bitrise.io/me/account/security).
+    is_required: true
+    is_sensitive: true
 
-  # Release options
-  - rollout_percentage: "100"
-    opts:
-      title: Rollout percentage
-      summary: Percentage of devices (0-100) that receive the update immediately.
-      description: |-
-        Percentage of devices, between 0 and 100, that receive this update immediately.
+# Release options
+- rollout_percentage: "100"
+  opts:
+    title: Rollout percentage
+    summary: Percentage of devices (0-100) that receive the update immediately.
+    description: |-
+      Percentage of devices, between 0 and 100, that receive this update immediately.
 
-        Leave at 100 to roll the update out to all devices right away, or set a lower value to
-        ramp up a staged rollout over time (adjustable later from the CodePush dashboard).
+      Leave at 100 to roll the update out to all devices right away, or set a lower value to
+      ramp up a staged rollout over time (adjustable later from the CodePush dashboard).
 
-  - mandatory: "false"
-    opts:
-      title: Mandatory update
-      summary: Force devices to install this update before continuing.
-      description: |-
-        When enabled, devices are forced to install this update (a "mandatory" or "forced" update)
-        instead of being able to defer it.
-      value_options:
-      - "true"
-      - "false"
+- mandatory: "false"
+  opts:
+    title: Mandatory update
+    summary: Force devices to install this update before continuing.
+    description: |-
+      When enabled, devices are forced to install this update (a "mandatory" or "forced" update)
+      instead of being able to defer it.
+    value_options:
+    - "true"
+    - "false"
 
-  - disabled_after_upload: "false"
-    opts:
-      title: Disable after upload
-      summary: Upload the update without activating it for devices yet.
-      description: |-
-        When enabled, the update is uploaded but not served to any device until manually enabled
-        later (e.g. from the CodePush dashboard). Useful for a "dark push" you plan to enable
-        after separate verification.
-      value_options:
-      - "true"
-      - "false"
+- disabled_after_upload: "false"
+  opts:
+    title: Disable after upload
+    summary: Upload the update without activating it for devices yet.
+    description: |-
+      When enabled, the update is uploaded but not served to any device until manually enabled
+      later (e.g. from the CodePush dashboard). Useful for a "dark push" you plan to enable
+      after separate verification.
+    value_options:
+    - "true"
+    - "false"
 
-  - description:
-    opts:
-      title: Update description
-      summary: Release notes shown for this update.
-      description: |-
-        Optional release notes / description for this update.
+- description:
+  opts:
+    title: Update description
+    summary: Release notes shown for this update.
+    description: |-
+      Optional release notes / description for this update.
 
-  # Bundling options
-  - project_dir: $BITRISE_SOURCE_DIR
-    opts:
-      title: Project directory
-      summary: Root directory of the React Native or Expo project.
-      description: |-
-        The root directory of the React Native or Expo project to bundle, containing its
-        `package.json`.
-      category: Bundling options
+# Bundling options
+- project_dir: $BITRISE_SOURCE_DIR
+  opts:
+    title: Project directory
+    summary: Root directory of the React Native or Expo project.
+    description: |-
+      The root directory of the React Native or Expo project to bundle, containing its
+      `package.json`.
+    category: Bundling options
 
-  - entry_file:
-    opts:
-      title: Entry file
-      summary: Path to the JS entry file, relative to Project directory.
-      description: |-
-        Path to the JavaScript entry file, relative to **Project directory**.
+- entry_file:
+  opts:
+    title: Entry file
+    summary: Path to the JS entry file, relative to Project directory.
+    description: |-
+      Path to the JavaScript entry file, relative to **Project directory**.
 
-        Leave empty to auto-detect (`index.<platform>.js`, then `index.js`, then the `main` field
-        in `package.json`).
-      category: Bundling options
+      Leave empty to auto-detect (`index.<platform>.js`, then `index.js`, then the `main` field
+      in `package.json`).
+    category: Bundling options
 
-  - hermes: auto
-    opts:
-      title: Hermes bytecode compilation
-      summary: Whether to compile the bundle to Hermes bytecode.
-      description: |-
-        Controls whether the JavaScript bundle is compiled to Hermes bytecode after bundling.
+- hermes: auto
+  opts:
+    title: Hermes bytecode compilation
+    summary: Whether to compile the bundle to Hermes bytecode.
+    description: |-
+      Controls whether the JavaScript bundle is compiled to Hermes bytecode after bundling.
 
-        - `auto`: detect from the project's `android/app/build.gradle` / `ios/Podfile`, falling
-          back to "enabled" for React Native >= 0.70 (where Hermes is the default engine) if no
-          explicit setting is found.
-        - `on`: always compile to Hermes bytecode.
-        - `off`: never compile to Hermes bytecode.
+      - `auto`: detect from the project's `android/app/build.gradle` / `ios/Podfile`, falling
+        back to "enabled" for React Native >= 0.70 (where Hermes is the default engine) if no
+        explicit setting is found.
+      - `on`: always compile to Hermes bytecode.
+      - `off`: never compile to Hermes bytecode.
 
-        The compiled bundle must match the Hermes/JSC engine the native app was built with, or the
-        update will fail to load on-device.
-      value_options:
-      - auto
-      - "on"
-      - "off"
-      category: Bundling options
+      The compiled bundle must match the Hermes/JSC engine the native app was built with, or the
+      update will fail to load on-device.
+    value_options:
+    - auto
+    - "on"
+    - "off"
+    category: Bundling options
 
-  - bundle_name:
-    opts:
-      title: Bundle filename
-      summary: Custom output filename for the JS bundle.
-      description: |-
-        Overrides the output filename of the generated JS bundle.
+- bundle_name:
+  opts:
+    title: Bundle filename
+    summary: Custom output filename for the JS bundle.
+    description: |-
+      Overrides the output filename of the generated JS bundle.
 
-        Leave empty to use the platform default (`main.jsbundle` for iOS, `index.android.bundle`
-        for Android), or the filename auto-detected from your native project files (Expo only).
-      category: Bundling options
+      Leave empty to use the platform default (`main.jsbundle` for iOS, `index.android.bundle`
+      for Android), or the filename auto-detected from your native project files (Expo only).
+    category: Bundling options
 
-  - skip_dependency_install: "false"
-    opts:
-      title: Skip dependency install
-      summary: Skip running the package manager install before bundling.
-      description: |-
-        When enabled, skips running `npm install` / `yarn install` / `pnpm install` / `bun install`
-        before bundling. Enable this if a previous Step in the Workflow already installed the
-        project's JS dependencies.
-      value_options:
-      - "true"
-      - "false"
-      category: Bundling options
+- skip_dependency_install: "false"
+  opts:
+    title: Skip dependency install
+    summary: Skip running the package manager install before bundling.
+    description: |-
+      When enabled, skips running `npm install` / `yarn install` / `pnpm install` / `bun install`
+      before bundling. Enable this if a previous Step in the Workflow already installed the
+      project's JS dependencies.
+    value_options:
+    - "true"
+    - "false"
+    category: Bundling options
 
-  # Advanced
-  - server_url: https://api.bitrise.io
-    opts:
-      title: API server URL
-      summary: Base URL of the Bitrise API server.
-      description: |-
-        Base URL of the Bitrise API server. Override only for testing against a non-production
-        environment.
-      category: Advanced
-      is_dont_change_value: true
+# Advanced
+- server_url: https://api.bitrise.io
+  opts:
+    title: API server URL
+    summary: Base URL of the Bitrise API server.
+    description: |-
+      Base URL of the Bitrise API server. Override only for testing against a non-production
+      environment.
+    category: Advanced
+    is_dont_change_value: true
 
-  - verbose_log: "false"
-    opts:
-      title: Enable verbose logging
-      summary: Print additional debug information.
-      description: |-
-        Enable this to print additional information useful for debugging.
-      value_options:
-      - "true"
-      - "false"
-      category: Advanced
-      is_dont_change_value: true
+- verbose_log: "false"
+  opts:
+    title: Enable verbose logging
+    summary: Print additional debug information.
+    description: |-
+      Enable this to print additional information useful for debugging.
+    value_options:
+    - "true"
+    - "false"
+    category: Advanced
+    is_dont_change_value: true
 
 outputs:
-  - BITRISE_CODEPUSH_UPDATE_ID:
-    opts:
-      title: CodePush update ID
-      summary: The package/update ID assigned to the pushed release.
-  - BITRISE_CODEPUSH_APP_VERSION:
-    opts:
-      title: Target app version
-      summary: The native app version the pushed update targets.
-  - BITRISE_CODEPUSH_PACKAGE_PATH:
-    opts:
-      title: Package path
-      summary: Path to the built update package, copied under $BITRISE_DEPLOY_DIR.
-      description: |-
-        Local path to the built and uploaded update package (a `.zip`). The Step copies it under
-        `$BITRISE_DEPLOY_DIR`, so a subsequent **Deploy to Bitrise.io** Step picks it up
-        automatically and it appears on the build's Artifacts tab.
+- BITRISE_CODEPUSH_UPDATE_ID:
+  opts:
+    title: CodePush update ID
+    summary: The package/update ID assigned to the pushed release.
+- BITRISE_CODEPUSH_APP_VERSION:
+  opts:
+    title: Target app version
+    summary: The native app version the pushed update targets.
+- BITRISE_CODEPUSH_PACKAGE_PATH:
+  opts:
+    title: Package path
+    summary: Path to the built update package, copied under $BITRISE_DEPLOY_DIR.
+    description: |-
+      Local path to the built and uploaded update package (a `.zip`). The Step copies it under
+      `$BITRISE_DEPLOY_DIR`, so a subsequent **Deploy to Bitrise.io** Step picks it up
+      automatically and it appears on the build's Artifacts tab.

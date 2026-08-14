@@ -1,6 +1,6 @@
 module github.com/bitrise-steplib/steps-bitrise-codepush
 
-go 1.26.6
+go 1.24.0
 
 require (
 	github.com/bitrise-io/go-steputils/v2 v2.0.0-alpha.52

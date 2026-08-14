@@ -59,7 +59,7 @@ func TestHTTPClientListDeployments(t *testing.T) {
 			assert.Equal(t, "test-token", r.Header.Get("Authorization"))
 
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"items":[{"id":"dep-1","name":"Staging"},{"id":"dep-2","name":"Production"}]}`))
+			_, _ = w.Write([]byte(`{"items":[{"id":"dep-1","name":"Staging"},{"id":"dep-2","name":"Production"}]}`))
 		}))
 		defer server.Close()
 
@@ -77,7 +77,7 @@ func TestHTTPClientListDeployments(t *testing.T) {
 	t.Run("handles HTTP error", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(`{"error":"invalid token"}`))
+			_, _ = w.Write([]byte(`{"error":"invalid token"}`))
 		}))
 		defer server.Close()
 
@@ -90,7 +90,7 @@ func TestHTTPClientListDeployments(t *testing.T) {
 	t.Run("handles empty list", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"items":[]}`))
+			_, _ = w.Write([]byte(`{"items":[]}`))
 		}))
 		defer server.Close()
 
@@ -116,7 +116,7 @@ func TestHTTPClientGetUploadURL(t *testing.T) {
 			assert.Empty(t, query.Get("rollout"))
 
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"url":"https://storage.example.com/upload","method":"PUT","headers":{"content_type":"application/zip"}}`))
+			_, _ = w.Write([]byte(`{"url":"https://storage.example.com/upload","method":"PUT","headers":{"content_type":"application/zip"}}`))
 		}))
 		defer server.Close()
 
@@ -142,7 +142,7 @@ func TestHTTPClientGetUploadURL(t *testing.T) {
 			assert.Equal(t, "100", query.Get("rollout"))
 
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"url":"https://example.com/upload","method":"PUT","headers":{}}`))
+			_, _ = w.Write([]byte(`{"url":"https://example.com/upload","method":"PUT","headers":{}}`))
 		}))
 		defer server.Close()
 
@@ -162,7 +162,7 @@ func TestHTTPClientGetUploadURL(t *testing.T) {
 			assert.Equal(t, "25", r.URL.Query().Get("rollout"))
 
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"url":"https://example.com/upload","method":"PUT","headers":{}}`))
+			_, _ = w.Write([]byte(`{"url":"https://example.com/upload","method":"PUT","headers":{}}`))
 		}))
 		defer server.Close()
 
@@ -182,7 +182,7 @@ func TestHTTPClientGetUploadURL(t *testing.T) {
 			assert.Equal(t, "0", r.URL.Query().Get("rollout"))
 
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"url":"https://example.com/upload","method":"PUT","headers":{}}`))
+			_, _ = w.Write([]byte(`{"url":"https://example.com/upload","method":"PUT","headers":{}}`))
 		}))
 		defer server.Close()
 
@@ -200,7 +200,7 @@ func TestHTTPClientGetUploadURL(t *testing.T) {
 	t.Run("handles API error", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(`{"error":"deployment not found"}`))
+			_, _ = w.Write([]byte(`{"error":"deployment not found"}`))
 		}))
 		defer server.Close()
 
@@ -243,7 +243,7 @@ func TestHTTPClientUploadFile(t *testing.T) {
 	t.Run("handles upload failure", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("URL expired"))
+			_, _ = w.Write([]byte("URL expired"))
 		}))
 		defer server.Close()
 
@@ -265,7 +265,7 @@ func TestHTTPClientGetUpdateStatus(t *testing.T) {
 			assert.Equal(t, "/updates/pkg-789/status", r.URL.Path)
 
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"update_id":"pkg-789","status":"done","status_reason":""}`))
+			_, _ = w.Write([]byte(`{"update_id":"pkg-789","status":"done","status_reason":""}`))
 		}))
 		defer server.Close()
 
@@ -280,7 +280,7 @@ func TestHTTPClientGetUpdateStatus(t *testing.T) {
 	t.Run("returns failed status with reason", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"update_id":"pkg-789","status":"failed","status_reason":"invalid bundle format"}`))
+			_, _ = w.Write([]byte(`{"update_id":"pkg-789","status":"failed","status_reason":"invalid bundle format"}`))
 		}))
 		defer server.Close()
 
@@ -295,7 +295,7 @@ func TestHTTPClientGetUpdateStatus(t *testing.T) {
 	t.Run("handles HTTP error", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("internal error"))
+			_, _ = w.Write([]byte("internal error"))
 		}))
 		defer server.Close()
 
@@ -313,7 +313,7 @@ func TestHTTPClientSetsUserAgent(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, expectedHeader, r.Header.Get("X-Bitrise-User-Agent"))
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"items":[]}`))
+			_, _ = w.Write([]byte(`{"items":[]}`))
 		}))
 		defer server.Close()
 
@@ -343,7 +343,7 @@ func TestHTTPClientSetsUserAgent(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, "bitrise-codepush-step/unknown", r.Header.Get("X-Bitrise-User-Agent"))
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"items":[]}`))
+			_, _ = w.Write([]byte(`{"items":[]}`))
 		}))
 		defer server.Close()
 

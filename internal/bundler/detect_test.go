@@ -479,7 +479,7 @@ func TestFindHermesc(t *testing.T) {
 		dir := t.TempDir()
 
 		hermescDir := filepath.Join(dir, "node_modules", "hermes-engine", osTriplet)
-		os.MkdirAll(hermescDir, 0o755)
+		require.NoError(t, os.MkdirAll(hermescDir, 0o755))
 		writeFile(t, filepath.Join(hermescDir, binaryName), "#!/bin/sh")
 
 		path, err := findHermesc(dir)
@@ -491,7 +491,7 @@ func TestFindHermesc(t *testing.T) {
 		dir := t.TempDir()
 
 		hermescDir := filepath.Join(dir, "node_modules", "react-native", "sdks", "hermesc", osTriplet)
-		os.MkdirAll(hermescDir, 0o755)
+		require.NoError(t, os.MkdirAll(hermescDir, 0o755))
 		writeFile(t, filepath.Join(hermescDir, binaryName), "#!/bin/sh")
 
 		path, err := findHermesc(dir)
@@ -503,11 +503,11 @@ func TestFindHermesc(t *testing.T) {
 		dir := t.TempDir()
 
 		loc1 := filepath.Join(dir, "node_modules", "hermes-engine", osTriplet)
-		os.MkdirAll(loc1, 0o755)
+		require.NoError(t, os.MkdirAll(loc1, 0o755))
 		writeFile(t, filepath.Join(loc1, binaryName), "primary")
 
 		loc2 := filepath.Join(dir, "node_modules", "react-native", "sdks", "hermesc", osTriplet)
-		os.MkdirAll(loc2, 0o755)
+		require.NoError(t, os.MkdirAll(loc2, 0o755))
 		writeFile(t, filepath.Join(loc2, binaryName), "secondary")
 
 		path, err := findHermesc(dir)

@@ -23,7 +23,7 @@ func TestHermesCompilerCompile(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "-out" && i+1 < len(args) {
-					os.WriteFile(args[i+1], []byte("bytecode"), 0o644)
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bytecode"), 0o644))
 				}
 			}
 		}
@@ -61,7 +61,7 @@ func TestHermesCompilerCompile(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "-out" && i+1 < len(args) {
-					os.WriteFile(args[i+1], []byte("bytecode"), 0o644)
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bytecode"), 0o644))
 				}
 			}
 		}
@@ -86,7 +86,7 @@ func TestHermesCompilerCompile(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "-out" && i+1 < len(args) {
-					os.WriteFile(args[i+1], []byte("bytecode"), 0o644)
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bytecode"), 0o644))
 				}
 			}
 		}
@@ -171,9 +171,9 @@ func TestHermesCompilerCompile(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "-out" && i+1 < len(args) {
-					os.WriteFile(args[i+1], []byte("bytecode"), 0o644)
+					require.NoError(t, os.WriteFile(args[i+1], []byte("bytecode"), 0o644))
 					// Also create the hermes source map
-					os.WriteFile(args[i+1]+".map", []byte(`{"hermes":true}`), 0o644)
+					require.NoError(t, os.WriteFile(args[i+1]+".map", []byte(`{"hermes":true}`), 0o644))
 				}
 			}
 		}
@@ -260,7 +260,7 @@ func TestComposeSourceMaps(t *testing.T) {
 		executor.onRun = func(_ string, _ string, args ...string) {
 			for i, arg := range args {
 				if arg == "-o" && i+1 < len(args) {
-					os.WriteFile(args[i+1], []byte(`{"composed":true}`), 0o644)
+					require.NoError(t, os.WriteFile(args[i+1], []byte(`{"composed":true}`), 0o644))
 				}
 			}
 		}
