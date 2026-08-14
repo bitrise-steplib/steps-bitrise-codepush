@@ -1,0 +1,165 @@
+format_version: "11"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  # Bitrise's own CodePush demo monorepo: a bare RN app (react_native/, committed native dirs)
+  # and an Expo app (expo/, expo-router, native dirs generated via `expo prebuild`, not
+  # committed), both already integrating @code-push-next/react-native-code-push.
+  - TEST_REPO_URL: https://github.com/bitrise-io/release-management-code-push-demo
+  - TEST_REPO_BRANCH: main
+  # A CodePush app + two deployments (Staging, Production) dedicated to this Step's e2e tests.
+  # Public: identifies which test fixture app/deployment to use, not a credential.
+  - BITRISE_CODEPUSH_TEST_APP_ID: $BITRISE_CODEPUSH_TEST_APP_ID
+  - BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+  # Secret: a Bitrise personal API token with access to the test app above.
+  - BITRISE_TOKEN: $BITRISE_TOKEN
+
+workflows:
+  _setup:
+    steps:
+    - script:
+        title: Clean up leftover _tmp folder
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            rm -rf ./_tmp
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
+        inputs:
+        - repository_url: $TEST_REPO_URL
+        - branch: $TEST_REPO_BRANCH
+        - clone_into_dir: ./_tmp
+
+  _check_outputs:
+    steps:
+    - script:
+        title: Verify Step outputs
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            if [ -z "$BITRISE_CODEPUSH_UPDATE_ID" ]; then
+              echo "BITRISE_CODEPUSH_UPDATE_ID is not set"
+              exit 1
+            fi
+
+            if [ "$BITRISE_CODEPUSH_APP_VERSION" != "1.0.0" ]; then
+              echo "BITRISE_CODEPUSH_APP_VERSION expected 1.0.0, got: $BITRISE_CODEPUSH_APP_VERSION"
+              exit 1
+            fi
+
+            if [ -z "$BITRISE_CODEPUSH_PACKAGE_PATH" ] || [ ! -f "$BITRISE_CODEPUSH_PACKAGE_PATH" ]; then
+              echo "BITRISE_CODEPUSH_PACKAGE_PATH does not point to an existing file: $BITRISE_CODEPUSH_PACKAGE_PATH"
+              exit 1
+            fi
+
+            case "$BITRISE_CODEPUSH_PACKAGE_PATH" in
+              "$BITRISE_DEPLOY_DIR"/*) ;;
+              *)
+                echo "BITRISE_CODEPUSH_PACKAGE_PATH is not under \$BITRISE_DEPLOY_DIR: $BITRISE_CODEPUSH_PACKAGE_PATH"
+                exit 1
+                ;;
+            esac
+
+            echo "Outputs OK: update_id=$BITRISE_CODEPUSH_UPDATE_ID package=$BITRISE_CODEPUSH_PACKAGE_PATH"
+
+  # `test_` prefix is used by unified CI to filter tests to run.
+  test_push_android_auto_hermes:
+    description: |-
+      Push an Android update from a plain React Native project, auto-detecting Hermes and the
+      package manager. Covers the Phase 1 happy path: bundle, upload, poll, export outputs, and
+      export the built package under $BITRISE_DEPLOY_DIR.
+    before_run:
+    - _setup
+    steps:
+    - path::./:
+        title: Run Bitrise CodePush
+        inputs:
+        - project_dir: ./_tmp/react_native
+        - platform: android
+        - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
+        - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - app_version: "1.0.0"
+        - api_token: $BITRISE_TOKEN
+        - rollout_percentage: "100"
+    after_run:
+    - _check_outputs
+
+  test_push_ios_mandatory_disabled:
+    description: |-
+      Push an iOS update with mandatory=true and disabled_after_upload=true, verifying those
+      flags don't break the upload/poll flow.
+    before_run:
+    - _setup
+    steps:
+    - path::./:
+        title: Run Bitrise CodePush
+        inputs:
+        - project_dir: ./_tmp/react_native
+        - platform: ios
+        - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
+        - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - app_version: "1.0.0"
+        - api_token: $BITRISE_TOKEN
+        - mandatory: "true"
+        - disabled_after_upload: "true"
+    after_run:
+    - _check_outputs
+
+  test_push_android_expo_auto_hermes:
+    description: |-
+      Push an Android update from an Expo (expo-router) project, auto-detecting Hermes and the
+      package manager. expo/ has no committed android/ dir (native dirs are generated via
+      `expo prebuild`), so Hermes auto-detection falls back to the RN-version heuristic
+      (>=0.70 defaults to Hermes on) rather than reading an explicit gradle setting — this
+      exercises that fallback path, and the ExpoBundler branch end-to-end (real `npx expo
+      export:embed --bytecode`), which test_push_android_auto_hermes / test_push_ios_mandatory_
+      disabled don't touch at all (both use the bare RN app).
+    before_run:
+    - _setup
+    steps:
+    - path::./:
+        title: Run Bitrise CodePush
+        inputs:
+        - project_dir: ./_tmp/expo
+        - platform: android
+        - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
+        - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - app_version: "1.0.0"
+        - api_token: $BITRISE_TOKEN
+    after_run:
+    - _check_outputs
+
+  test_push_ios_expo_auto_hermes:
+    description: |-
+      Same as test_push_android_expo_auto_hermes but for iOS: confirms the Hermes-detection and
+      bundle-name fallbacks (no committed ios/Podfile or AppDelegate to inspect, since expo/'s
+      native dirs are expo-prebuild-generated) also hold on the iOS side, not just Android.
+    before_run:
+    - _setup
+    steps:
+    - path::./:
+        title: Run Bitrise CodePush
+        inputs:
+        - project_dir: ./_tmp/expo
+        - platform: ios
+        - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
+        - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - app_version: "1.0.0"
+        - api_token: $BITRISE_TOKEN
+    after_run:
+    - _check_outputs
+
+  # Input-validation failures (out-of-range rollout_percentage, missing required fields, etc.)
+  # are intentionally NOT covered here as an e2e case. There is no env var that reflects whether
+  # an `is_skippable: true` step actually failed as expected — with is_skippable set, bitrise run
+  # absorbs the failure completely (BITRISE_BUILD_STATUS stays "0", BITRISE_FAILED_STEP_TITLE is
+  # never set, the overall run exits 0), so a later step can't verify it happened. Without
+  # is_skippable, the failure instead fails the whole `bitrise run` invocation, which Unified CI
+  # would read as this e2e case being broken, not passing. Verified both empirically before
+  # deciding this wasn't worth fighting: this validation is already covered thoroughly by
+  # step/step_test.go's ProcessConfig unit tests (out-of-range/non-numeric rollout, missing
+  # required fields, invalid platform/hermes, etc.), which is the right place for it anyway per
+  # the Step - Testing conventions (unit tests for logic, e2e for the real integration).

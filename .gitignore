@@ -1,0 +1,20 @@
+.idea
+.vscode
+.DS_Store
+
+# Scratch discussion notes for the PR review, not meant to ship
+REVIEW_NOTES.md
+
+# Bitrise
+.bitrise.secrets.yml
+_tmp
+
+# Go
+/steps-bitrise-codepush
+*.test
+
+# Local sample/e2e bundling output (DefaultOutputDir is relative, so running the Step locally
+# via `bitrise run sample` / `bitrise run --config e2e/bitrise.yml ...` from the repo root leaves
+# these as siblings of this file)
+/CodePush
+/CodePush.zip
