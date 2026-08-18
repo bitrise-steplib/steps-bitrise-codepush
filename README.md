@@ -8,10 +8,7 @@ Bundle React Native or Expo JavaScript and push it as an OTA update to Bitrise C
 <summary>Description</summary>
 
 Bundles the JavaScript code (and assets) of a React Native project and publishes it as an
-over-the-air (OTA) update to a Bitrise CodePush deployment, so devices running the CodePush SDK
-can pick it up without going through an app store release. Next to bundling, the Step manages
-the CodePush update upload and rollout configuration (rollout percentage, mandatory, and
-disabled-after-upload).
+over-the-air (OTA) update to a Bitrise CodePush deployment.
 
 ### Configuring the Step
 
