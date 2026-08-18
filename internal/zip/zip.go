@@ -1,7 +1,3 @@
-// Package zip provides utilities for creating zip archives from directories.
-//
-// Ported from github.com/bitrise-io/bitrise-plugins-codepush-cli @ 4b586c72b61af87818445db251a60ee097b3f5bd
-// (internal/zip/zip.go), unchanged apart from this notice.
 package zip
 
 import (

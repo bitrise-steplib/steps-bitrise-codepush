@@ -1,16 +1,3 @@
-// Package bundler provides JavaScript bundle generation for React Native and Expo projects.
-//
-// Ported from github.com/bitrise-io/bitrise-plugins-codepush-cli @ 4b586c72b61af87818445db251a60ee097b3f5bd
-// (internal/bundler/*.go). This is a deliberate source copy, not a module dependency: the CLI's
-// internal/ package cannot be imported by another module, and the CLI's importable surface pulls in
-// an interactive terminal-UI dependency stack (charmbracelet/huh, lipgloss) that has no place in a
-// non-interactive CI step. See the project brief for the full rationale:
-// https://bitrise.atlassian.net/wiki/spaces/RD/pages/5151653927
-//
-// Differences from the source: the interactive progress/spinner output (internal/output.Writer) and
-// the PTY-backed bundler invocation (only used for TTY progress rendering) were dropped, since a CI
-// step always runs non-interactively. Bundle signing (internal/bundler/signing.go) was intentionally
-// not ported; it is Phase 2 scope per the project brief.
 package bundler
 
 import (
@@ -20,8 +7,7 @@ import (
 	"os/exec"
 )
 
-// Logger is the minimal logging surface bundler needs. Satisfied by
-// github.com/bitrise-io/go-utils/v2/log.Logger.
+// Logger is satisfied by github.com/bitrise-io/go-utils/v2/log.Logger.
 type Logger interface {
 	Infof(format string, args ...interface{})
 	Debugf(format string, args ...interface{})
@@ -35,7 +21,6 @@ type Logger interface {
 // other name produces a hash mismatch and the signed update is rejected.
 const DefaultOutputDir = "./CodePush"
 
-// ValidatePlatform checks that the given platform string is valid.
 func ValidatePlatform(p Platform) error {
 	if p != PlatformIOS && p != PlatformAndroid {
 		return fmt.Errorf("platform must be 'ios' or 'android', got %q", p)
@@ -43,7 +28,6 @@ func ValidatePlatform(p Platform) error {
 	return nil
 }
 
-// ValidateHermesMode checks that the given hermes mode string is valid.
 func ValidateHermesMode(h HermesMode) error {
 	if h != HermesModeAuto && h != HermesModeOn && h != HermesModeOff {
 		return fmt.Errorf("hermes mode must be 'auto', 'on', or 'off', got %q", h)
@@ -51,7 +35,6 @@ func ValidateHermesMode(h HermesMode) error {
 	return nil
 }
 
-// BundleOptions holds user-specified options for bundle generation.
 type BundleOptions struct {
 	Platform         Platform
 	EntryFile        string
@@ -72,7 +55,6 @@ type BundleOptions struct {
 	PodFile          string // override path for ios/Podfile (Hermes auto-detection)
 }
 
-// BundleResult contains the output of a successful bundle operation.
 type BundleResult struct {
 	BundlePath    string
 	AssetsDir     string
@@ -83,7 +65,6 @@ type BundleResult struct {
 	Platform      Platform
 }
 
-// Bundler is the interface for building a JS bundle.
 type Bundler interface {
 	Bundle(config *ProjectConfig, opts *BundleOptions) (*BundleResult, error)
 }
@@ -93,10 +74,8 @@ type CommandExecutor interface {
 	Run(dir string, stdout io.Writer, stderr io.Writer, name string, args ...string) error
 }
 
-// DefaultExecutor implements CommandExecutor using os/exec.
 type DefaultExecutor struct{}
 
-// Run executes a command with the given args in the given directory.
 func (e *DefaultExecutor) Run(dir string, stdout io.Writer, stderr io.Writer, name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
@@ -105,7 +84,6 @@ func (e *DefaultExecutor) Run(dir string, stdout io.Writer, stderr io.Writer, na
 	return cmd.Run()
 }
 
-// NewBundler creates the appropriate Bundler implementation based on project type.
 func NewBundler(projectType ProjectType, executor CommandExecutor, logger Logger) (Bundler, error) {
 	switch projectType {
 	case ProjectTypeReactNative:
@@ -117,7 +95,6 @@ func NewBundler(projectType ProjectType, executor CommandExecutor, logger Logger
 	}
 }
 
-// DefaultBundleName returns the platform-specific default bundle filename.
 func DefaultBundleName(platform Platform) string {
 	switch platform {
 	case PlatformIOS:
@@ -129,7 +106,6 @@ func DefaultBundleName(platform Platform) string {
 	}
 }
 
-// ensureDir creates a directory if it does not exist.
 func ensureDir(path string) error {
 	if err := os.MkdirAll(path, 0o755); err != nil {
 		return fmt.Errorf("creating directory %s: %w", path, err)

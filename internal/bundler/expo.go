@@ -1,6 +1,3 @@
-// Ported from github.com/bitrise-io/bitrise-plugins-codepush-cli @ 4b586c72b61af87818445db251a60ee097b3f5bd
-// (internal/bundler/expo.go). The PTY-backed invocation path and interactive output.Writer
-// dependency were dropped for the same reason as internal/bundler/reactnative.go.
 package bundler
 
 import (
@@ -18,7 +15,6 @@ type ExpoBundler struct {
 	logger   Logger
 }
 
-// Bundle implements Bundler for Expo projects.
 func (b *ExpoBundler) Bundle(config *ProjectConfig, opts *BundleOptions) (*BundleResult, error) {
 	outputDir, err := filepath.Abs(opts.OutputDir)
 	if err != nil {
@@ -70,7 +66,6 @@ func (b *ExpoBundler) Bundle(config *ProjectConfig, opts *BundleOptions) (*Bundl
 	return result, nil
 }
 
-// buildArgs constructs the argument list for "npx expo export:embed".
 func (b *ExpoBundler) buildArgs(config *ProjectConfig, opts *BundleOptions, outputDir, bundlePath, mapPath string) []string {
 	args := []string{
 		"expo", "export:embed",

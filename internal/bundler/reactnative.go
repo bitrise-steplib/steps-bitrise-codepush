@@ -1,8 +1,3 @@
-// Ported from github.com/bitrise-io/bitrise-plugins-codepush-cli @ 4b586c72b61af87818445db251a60ee097b3f5bd
-// (internal/bundler/reactnative.go). The PTY-backed invocation path (only used to render a live
-// progress bar in an interactive terminal) and the interactive output.Writer dependency were
-// dropped: a CI step always runs non-interactively and streams command output directly to the
-// step log instead.
 package bundler
 
 import (
@@ -11,7 +6,6 @@ import (
 	"path/filepath"
 )
 
-// bundlePaths groups the derived file paths used during bundling.
 type bundlePaths struct {
 	outputDir     string
 	bundlePath    string
@@ -25,7 +19,6 @@ type ReactNativeBundler struct {
 	logger   Logger
 }
 
-// Bundle implements Bundler for React Native projects.
 func (b *ReactNativeBundler) Bundle(config *ProjectConfig, opts *BundleOptions) (*BundleResult, error) {
 	outputDir, err := filepath.Abs(opts.OutputDir)
 	if err != nil {
@@ -87,7 +80,6 @@ func (b *ReactNativeBundler) Bundle(config *ProjectConfig, opts *BundleOptions) 
 	return result, nil
 }
 
-// buildArgs constructs the argument list for "npx react-native bundle".
 func (b *ReactNativeBundler) buildArgs(config *ProjectConfig, opts *BundleOptions, paths bundlePaths) []string {
 	entryFile := opts.EntryFile
 	if entryFile == "" {

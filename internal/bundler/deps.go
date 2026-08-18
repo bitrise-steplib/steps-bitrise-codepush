@@ -1,6 +1,3 @@
-// Ported from github.com/bitrise-io/bitrise-plugins-codepush-cli @ 4b586c72b61af87818445db251a60ee097b3f5bd
-// (internal/bundler/deps.go). The interactive output.Writer dependency was replaced with the
-// package-local Logger interface.
 package bundler
 
 import (
@@ -9,8 +6,6 @@ import (
 	"path/filepath"
 )
 
-// detectPackageManager checks the project directory for lock files
-// and returns the package manager name and command.
 func detectPackageManager(projectDir string) (name, cmd string) {
 	lockFiles := []struct {
 		file string
@@ -32,7 +27,6 @@ func detectPackageManager(projectDir string) (name, cmd string) {
 	return "npm", "npm"
 }
 
-// installDependencies detects the package manager and runs install.
 func installDependencies(projectDir string, executor CommandExecutor, logger Logger) error {
 	name, cmd := detectPackageManager(projectDir)
 

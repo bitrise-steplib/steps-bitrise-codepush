@@ -1,6 +1,3 @@
-// Ported from github.com/bitrise-io/bitrise-plugins-codepush-cli @ 4b586c72b61af87818445db251a60ee097b3f5bd
-// (internal/bundler/run.go). The interactive output.Writer dependency was replaced with the
-// package-local Logger interface; behavior is otherwise unchanged.
 package bundler
 
 import (

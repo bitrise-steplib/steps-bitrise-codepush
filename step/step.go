@@ -1,4 +1,3 @@
-// Package step implements the Bitrise CodePush step.
 package step
 
 import (
@@ -13,12 +12,9 @@ import (
 	ziputil "github.com/bitrise-steplib/steps-bitrise-codepush/internal/zip"
 )
 
-// outputPackagePath is the output env var key exported by this step.
 const outputPackagePath = "BITRISE_CODEPUSH_PACKAGE_PATH"
 
-// Config is the parsed and validated set of step inputs.
 type Config struct {
-	// Bundling
 	ProjectDir            string `env:"project_dir,dir"`
 	Platform              string `env:"platform,opt[ios,android]"`
 	EntryFile             string `env:"entry_file"`
@@ -26,31 +22,22 @@ type Config struct {
 	HermesMode            string `env:"hermes,opt[auto,on,off]"`
 	SkipDependencyInstall bool   `env:"skip_dependency_install,opt[true,false]"`
 
-	// Populated from the Bitrise-provided build env, not a step input.
-	// Note: stepconf only supports a single constraint token per field (see
-	// stepconf.validateConstraint), so this cannot be "required,dir" — that combination never
-	// matches any recognized constraint and would make ProcessConfig fail unconditionally. "dir"
-	// alone already rejects an empty/missing value (os.Stat("") errors), which covers the
-	// "required" intent in practice.
 	DeployDir string `env:"BITRISE_DEPLOY_DIR,dir"`
 
 	VerboseLog bool `env:"verbose_log,opt[true,false]"`
 }
 
-// Result is the outcome of a successful Run, consumed by ExportOutputs.
 type Result struct {
 	PackagePath string
 	DeployDir   string
 }
 
-// Step implements the CodePush publish step.
 type Step struct {
 	inputParser stepconf.InputParser
 	logger      log.Logger
 	exporter    export.Exporter
 }
 
-// New creates a Step with its dependencies injected.
 func New(inputParser stepconf.InputParser, logger log.Logger, exporter export.Exporter) Step {
 	return Step{
 		inputParser: inputParser,
@@ -59,7 +46,6 @@ func New(inputParser stepconf.InputParser, logger log.Logger, exporter export.Ex
 	}
 }
 
-// ProcessConfig parses and validates the step's inputs.
 func (s Step) ProcessConfig() (Config, error) {
 	var cfg Config
 	if err := s.inputParser.Parse(&cfg); err != nil {
@@ -73,7 +59,6 @@ func (s Step) ProcessConfig() (Config, error) {
 	return cfg, nil
 }
 
-// Run bundles the JavaScript project and packages it into a zip.
 func (s Step) Run(cfg Config) (Result, error) {
 	bundleOpts := &bundler.BundleOptions{
 		Platform:    bundler.Platform(cfg.Platform),

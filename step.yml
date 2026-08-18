@@ -1,4 +1,4 @@
-title: Bitrise CodePush
+title: Bitrise CodePush Publish
 summary: Bundle React Native or Expo JavaScript and push it as an OTA update to Bitrise CodePush.
 description: |-
   Bundles the JavaScript code (and assets) of a React Native project and publishes it as an
