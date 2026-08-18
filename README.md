@@ -7,33 +7,19 @@ Bundle React Native or Expo JavaScript into a CodePush-ready update package.
 <details>
 <summary>Description</summary>
 
-Bundles the JavaScript code (and assets) of a React Native or Expo project and publishes it as
-an over-the-air (OTA) update to a [Bitrise CodePush](https://bitrise.io) deployment, so devices
-running the [CodePush SDK](https://github.com/bitrise-io/bitrise-plugins-codepush-cli) can pick
-it up without going through an app store release.
+Bundles the JavaScript code (and assets) of a React Native project and packages it for a
+Bitrise CodePush over-the-air (OTA) update.
 
-This is the officially supported way to publish CodePush updates from a Bitrise build. It
-replaces installing the `bitrise-plugins-codepush-cli` CLI plugin at runtime or shelling out to
-the `release-management-recipes` reference script: this Step ports the same publishing logic
-natively, with typed inputs, secret handling, and artifact export.
-
-### Current status
-
-This Step is being built incrementally across a stack of PRs. **This revision only bundles the
-JavaScript project and exports the built package** — it does not yet authenticate with or
-upload to CodePush. That lands in follow-up PRs (see the
-[project brief](https://bitrise.atlassian.net/wiki/spaces/RD/pages/5151653927) for the full
-scope).
-
-### Configuring the Step (current scope)
+### Configuring the Step
 
 1. Add the Step to a Workflow after your JS dependencies are installed (or leave
    **Skip dependency install** unchecked and let the Step run the install for you).
 2. Set **Target platform** to `ios` or `android`. Each run only bundles for one platform.
 
-The Step auto-detects your project type (React Native or Expo), entry file, and Hermes bytecode
-configuration; overrides are available under **Bundling options** if auto-detection doesn't fit
-your project layout.
+The Step auto-detects your project's entry file and Hermes bytecode configuration; overrides
+are available under **Bundling options** if auto-detection doesn't fit your project layout.
+Expo projects are supported too — the Step detects Expo vs. bare React Native automatically
+from your project's `package.json`.
 
 The built package is exported under `$BITRISE_DEPLOY_DIR`, so a subsequent
 **Deploy to Bitrise.io** Step picks it up automatically and it shows up on the build's Artifacts
