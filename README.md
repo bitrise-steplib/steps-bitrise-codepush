@@ -2,13 +2,16 @@
 
 [![Step changelog](https://shields.io/github/v/release/bitrise-steplib/steps-bitrise-codepush?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/steps-bitrise-codepush/releases)
 
-Bundle React Native or Expo JavaScript into a CodePush-ready update package.
+Bundle React Native or Expo JavaScript and push it as an OTA update to Bitrise CodePush.
 
 <details>
 <summary>Description</summary>
 
-Bundles the JavaScript code (and assets) of a React Native project and packages it for a
-Bitrise CodePush over-the-air (OTA) update.
+Bundles the JavaScript code (and assets) of a React Native project and publishes it as an
+over-the-air (OTA) update to a Bitrise CodePush deployment, so devices running the CodePush SDK
+can pick it up without going through an app store release. Next to bundling, the Step manages
+the CodePush update upload and rollout configuration (rollout percentage, mandatory, and
+disabled-after-upload).
 
 ### Configuring the Step
 
