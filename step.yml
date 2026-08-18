@@ -91,23 +91,17 @@ inputs:
 - api_token:
   opts:
     title: Bitrise API token
-    summary: Personal or Workspace API access token used to authenticate with Bitrise CodePush.
+    summary: Workspace or Personal API access token used to authenticate with Bitrise CodePush.
     description: |-
       A Bitrise API access token with access to the app above.
 
-      Generate one under **Account Settings > Security** on [bitrise.io](https://app.bitrise.io/me/account/security).
+      Prefer a **Workspace API token**: unlike a personal access token, it isn't tied to any one
+      team member's account, so it keeps working if that person leaves or their access changes.
+      A **Personal Access Token** (generated under **Account Settings > Security** on
+      [bitrise.io](https://app.bitrise.io/me/account/security)) also works, but ties this Step's
+      ability to publish updates to that individual's account.
     is_required: true
     is_sensitive: true
-
-- server_url: https://api.bitrise.io
-  opts:
-    title: API server URL
-    summary: Base URL of the Bitrise API server.
-    description: |-
-      Base URL of the Bitrise API server. Override only for testing against a non-production
-      environment.
-    category: Advanced
-    is_dont_change_value: true
 
 - project_dir: $BITRISE_SOURCE_DIR
   opts:

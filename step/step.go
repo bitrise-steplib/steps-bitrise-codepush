@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 
 	"github.com/bitrise-io/go-steputils/v2/export"
@@ -21,9 +22,21 @@ const defaultServerURL = "https://api.bitrise.io"
 
 const codePushAPIPath = "/release-management/v2/code-push/v1"
 
-// stepUserAgentVersion identifies this step's requests to the CodePush API. It is cosmetic
-// (server-side logging/debugging only) and intentionally not wired to the step's own semver.
-const stepUserAgentVersion = "1"
+// stepUserAgentVersion identifies this step's requests to the CodePush API for server-side
+// logging/debugging: the VCS revision the running binary was built from, so a specific build can
+// be traced back to its source. Falls back to "unknown" if build info isn't available.
+func stepUserAgentVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "unknown"
+	}
+	for _, setting := range info.Settings {
+		if setting.Key == "vcs.revision" {
+			return setting.Value
+		}
+	}
+	return "unknown"
+}
 
 type Config struct {
 	ProjectDir            string `env:"project_dir,dir"`
@@ -86,7 +99,7 @@ func (s Step) ProcessConfig() (Config, error) {
 func (s Step) Run(cfg Config) (Result, error) {
 	ctx := context.Background()
 
-	client := codepush.NewHTTPClient(cfg.ServerURL+codePushAPIPath, string(cfg.APIToken), stepUserAgentVersion)
+	client := codepush.NewHTTPClient(cfg.ServerURL+codePushAPIPath, string(cfg.APIToken), stepUserAgentVersion())
 
 	s.logger.Infof("Resolving CodePush app and deployment")
 	if _, err := codepush.ResolveDeployment(ctx, client, cfg.AppID, cfg.Deployment, s.logger); err != nil {
