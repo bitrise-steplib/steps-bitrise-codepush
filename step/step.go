@@ -1,14 +1,4 @@
-// Package step implements the Bitrise CodePush step following the ideal Bitrise Step
-// architecture: ProcessConfig -> InstallDependencies -> Run -> ExportOutputs.
-//
-// This is Phase 1 of a stacked PR sequence: bundling only. The step bundles a React Native or
-// Expo project's JavaScript (auto-detecting project type, entry file, and Hermes bytecode
-// config), zips it, and exports the package under $BITRISE_DEPLOY_DIR. It does not yet
-// authenticate with or upload to CodePush — that lands in later PRs in the stack.
-//
-// The bundling logic itself is ported from bitrise-plugins-codepush-cli into internal/bundler;
-// see that package's doc comment for details. This file only wires step inputs to that logic and
-// exports outputs.
+// Package step implements the Bitrise CodePush step.
 package step
 
 import (
@@ -83,14 +73,6 @@ func (s Step) ProcessConfig() (Config, error) {
 	return cfg, nil
 }
 
-// InstallDependencies is a no-op: the only external dependency this step needs (the target JS
-// project's own package manager install) is part of the bundling business logic and runs in Run,
-// not a step-level tooling dependency. Present to keep the step's shape aligned with the ideal
-// architecture's 4 phases.
-func (s Step) InstallDependencies() error {
-	return nil
-}
-
 // Run bundles the JavaScript project and packages it into a zip.
 func (s Step) Run(cfg Config) (Result, error) {
 	bundleOpts := &bundler.BundleOptions{
@@ -103,13 +85,6 @@ func (s Step) Run(cfg Config) (Result, error) {
 		HermesMode:  bundler.HermesMode(cfg.HermesMode),
 		ProjectDir:  cfg.ProjectDir,
 		SkipInstall: cfg.SkipDependencyInstall,
-	}
-
-	if err := bundler.ValidatePlatform(bundleOpts.Platform); err != nil {
-		return Result{}, err
-	}
-	if err := bundler.ValidateHermesMode(bundleOpts.HermesMode); err != nil {
-		return Result{}, err
 	}
 
 	s.logger.Infof("Bundling JavaScript")

@@ -26,11 +26,6 @@ func run() int {
 		return 1
 	}
 
-	if err := codePushStep.InstallDependencies(); err != nil {
-		logger.Errorf(err.Error())
-		return 1
-	}
-
 	result, err := codePushStep.Run(config)
 	if err != nil {
 		logger.Errorf(err.Error())
