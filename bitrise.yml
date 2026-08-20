@@ -1,0 +1,42 @@
+format_version: "11"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+workflows:
+  check:
+    steps:
+    - git::https://github.com/bitrise-steplib/steps-check.git: { }
+
+  e2e:
+    steps:
+    - git::https://github.com/bitrise-steplib/steps-check.git:
+        inputs:
+        - workflow: e2e
+
+  # For local debugging convenience. No CodePush credentials needed at this stage of the stack —
+  # this revision only bundles and packages, it doesn't upload anywhere yet.
+  sample:
+    envs:
+    - TEST_REPO_URL: https://github.com/naveen-bitrise/Bitrise-ReactNative-CodePush
+    - TEST_REPO_BRANCH: main
+    steps:
+    - script:
+        title: Remove leftover _tmp folder
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            rm -rf ./_tmp
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
+        inputs:
+        - repository_url: $TEST_REPO_URL
+        - branch: $TEST_REPO_BRANCH
+        - clone_into_dir: ./_tmp
+    - path::./:
+        title: Test current Step
+        inputs:
+        - project_dir: ./_tmp
+        - platform: android
+
+  generate_readme:
+    steps:
+    - git::https://github.com/bitrise-steplib/steps-readme-generator.git@main: { }

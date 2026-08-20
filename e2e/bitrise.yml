@@ -1,0 +1,82 @@
+format_version: "11"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  # A modern (RN 0.78) sample app that already integrates @code-push-next/react-native-code-push,
+  # with real android/ios project files for Hermes auto-detection to exercise. No CodePush
+  # credentials needed at this stage of the stack: this revision only bundles and packages.
+  - TEST_REPO_URL: https://github.com/naveen-bitrise/Bitrise-ReactNative-CodePush
+  - TEST_REPO_BRANCH: main
+
+workflows:
+  _setup:
+    steps:
+    - script:
+        title: Clean up leftover _tmp folder
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            rm -rf ./_tmp
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
+        inputs:
+        - repository_url: $TEST_REPO_URL
+        - branch: $TEST_REPO_BRANCH
+        - clone_into_dir: ./_tmp
+
+  _check_outputs:
+    steps:
+    - script:
+        title: Verify Step outputs
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            if [ -z "$BITRISE_CODEPUSH_PACKAGE_PATH" ] || [ ! -f "$BITRISE_CODEPUSH_PACKAGE_PATH" ]; then
+              echo "BITRISE_CODEPUSH_PACKAGE_PATH does not point to an existing file: $BITRISE_CODEPUSH_PACKAGE_PATH"
+              exit 1
+            fi
+
+            case "$BITRISE_CODEPUSH_PACKAGE_PATH" in
+              "$BITRISE_DEPLOY_DIR"/*) ;;
+              *)
+                echo "BITRISE_CODEPUSH_PACKAGE_PATH is not under \$BITRISE_DEPLOY_DIR: $BITRISE_CODEPUSH_PACKAGE_PATH"
+                exit 1
+                ;;
+            esac
+
+            echo "Outputs OK: package=$BITRISE_CODEPUSH_PACKAGE_PATH"
+
+  # `test_` prefix is used by unified CI to filter tests to run.
+  test_bundle_android_auto_hermes:
+    description: |-
+      Bundle for Android from a plain React Native project, auto-detecting Hermes and the package
+      manager, and export the package under $BITRISE_DEPLOY_DIR. No CodePush credentials needed.
+    before_run:
+    - _setup
+    steps:
+    - path::./:
+        title: Run Bitrise CodePush
+        inputs:
+        - project_dir: ./_tmp
+        - platform: android
+    after_run:
+    - _check_outputs
+
+  test_bundle_ios_hermes_off:
+    description: |-
+      Same as test_bundle_android_auto_hermes but for iOS, with Hermes explicitly disabled —
+      exercises the hermes: off path (skips hermesc entirely) rather than just auto-detection.
+    before_run:
+    - _setup
+    steps:
+    - path::./:
+        title: Run Bitrise CodePush
+        inputs:
+        - project_dir: ./_tmp
+        - platform: ios
+        - hermes: "off"
+    after_run:
+    - _check_outputs

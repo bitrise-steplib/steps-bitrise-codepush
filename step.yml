@@ -1,0 +1,140 @@
+title: Bitrise CodePush Publish
+summary: Bundle React Native or Expo JavaScript and push it as an OTA update to Bitrise CodePush.
+description: |-
+  Bundles the JavaScript code (and assets) of a React Native project and publishes it as an
+  over-the-air (OTA) update to a Bitrise CodePush deployment.
+
+  ### Configuring the Step
+
+  1. Add the Step to a Workflow after your JS dependencies are installed (or leave
+     **Skip dependency install** unchecked and let the Step run the install for you).
+  2. Set **Target platform** to `ios` or `android`. Each run only bundles for one platform.
+
+  The Step auto-detects your project's entry file and Hermes bytecode configuration; overrides
+  are available under **Bundling options** if auto-detection doesn't fit your project layout.
+  Expo projects are supported too — the Step detects Expo vs. bare React Native automatically
+  from your project's `package.json`.
+
+  The built package is exported under `$BITRISE_DEPLOY_DIR`, so a subsequent
+  **Deploy to Bitrise.io** Step picks it up automatically and it shows up on the build's Artifacts
+  tab, with no extra wiring needed.
+
+  ### Useful links
+
+  - [About CodePush](https://github.com/bitrise-io/bitrise-plugins-codepush-cli)
+  - [Using the Hermes engine, Expo Documentation](https://docs.expo.dev/guides/using-hermes/)
+
+website: https://github.com/bitrise-steplib/steps-bitrise-codepush
+source_code_url: https://github.com/bitrise-steplib/steps-bitrise-codepush
+support_url: https://github.com/bitrise-steplib/steps-bitrise-codepush/issues
+
+project_type_tags:
+- react-native
+
+type_tags:
+- deploy
+
+toolkit:
+  go:
+    package_name: github.com/bitrise-steplib/steps-bitrise-codepush
+
+inputs:
+- platform: ios
+  opts:
+    title: Target platform
+    summary: The platform the update targets.
+    description: |-
+      The platform the JavaScript bundle and update target.
+
+      Each run of the Step bundles for a single platform (the bundle filename and entry file
+      differ between iOS and Android).
+    value_options:
+    - ios
+    - android
+    is_required: true
+
+- project_dir: $BITRISE_SOURCE_DIR
+  opts:
+    title: Project directory
+    summary: Root directory of the React Native or Expo project.
+    description: |-
+      The root directory of the React Native or Expo project to bundle, containing its
+      `package.json`.
+    category: Bundling options
+
+- entry_file:
+  opts:
+    title: Entry file
+    summary: Path to the JS entry file, relative to Project directory.
+    description: |-
+      Path to the JavaScript entry file, relative to **Project directory**.
+
+      Leave empty to auto-detect (`index.<platform>.js`, then `index.js`, then the `main` field
+      in `package.json`).
+    category: Bundling options
+
+- hermes: auto
+  opts:
+    title: Hermes bytecode compilation
+    summary: Whether to compile the bundle to Hermes bytecode.
+    description: |-
+      Controls whether the JavaScript bundle is compiled to Hermes bytecode after bundling.
+
+      - `auto`: detect from the project's `android/app/build.gradle` / `ios/Podfile`, falling
+        back to "enabled" for React Native >= 0.70 (where Hermes is the default engine) if no
+        explicit setting is found.
+      - `on`: always compile to Hermes bytecode.
+      - `off`: never compile to Hermes bytecode.
+
+      The compiled bundle must match the Hermes/JSC engine the native app was built with, or the
+      update will fail to load on-device.
+    value_options:
+    - auto
+    - "on"
+    - "off"
+    category: Bundling options
+
+- bundle_name:
+  opts:
+    title: Bundle filename
+    summary: Custom output filename for the JS bundle.
+    description: |-
+      Overrides the output filename of the generated JS bundle.
+
+      Leave empty to use the platform default (`main.jsbundle` for iOS, `index.android.bundle`
+      for Android), or the filename auto-detected from your native project files (Expo only).
+    category: Bundling options
+
+- skip_dependency_install: "false"
+  opts:
+    title: Skip dependency install
+    summary: Skip running the package manager install before bundling.
+    description: |-
+      When enabled, skips running `npm install` / `yarn install` / `pnpm install` / `bun install`
+      before bundling. Enable this if a previous Step in the Workflow already installed the
+      project's JS dependencies.
+    value_options:
+    - "true"
+    - "false"
+    category: Bundling options
+
+- verbose_log: "false"
+  opts:
+    title: Enable verbose logging
+    summary: Print additional debug information.
+    description: |-
+      Enable this to print additional information useful for debugging.
+    value_options:
+    - "true"
+    - "false"
+    category: Advanced
+
+outputs:
+- BITRISE_CODEPUSH_PACKAGE_PATH:
+  opts:
+    title: Package path
+    summary: Path to the built update package, copied under $BITRISE_DEPLOY_DIR.
+    description: |-
+      Local path to the built update package (a `.zip`). The Step copies it under
+      `$BITRISE_DEPLOY_DIR`, so a subsequent **Deploy to Bitrise.io** Step picks it up
+      automatically and it appears on the build's Artifacts tab.
