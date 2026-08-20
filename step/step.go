@@ -66,7 +66,7 @@ func (s Step) Run(cfg Config) (Result, error) {
 		OutputDir:   bundler.DefaultOutputDir,
 		BundleName:  cfg.BundleName,
 		ResetCache:  true,
-		Sourcemap:   true,
+		Sourcemap:   false,
 		HermesMode:  bundler.HermesMode(cfg.HermesMode),
 		ProjectDir:  cfg.ProjectDir,
 		SkipInstall: cfg.SkipDependencyInstall,
