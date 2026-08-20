@@ -55,19 +55,11 @@ workflows:
 
             echo "Outputs OK: package=$BITRISE_CODEPUSH_PACKAGE_PATH"
 
-  # No `test_`-prefixed (automatic) e2e workflows in this PR. From here on, every Run() starts by
-  # resolving app_id/deployment/api_token against the real CodePush API before bundling — there's
-  # no way to exercise that path without real credentials. The three secrets below
-  # (BITRISE_CODEPUSH_TEST_APP_ID / _STAGING_DEPLOYMENT / BITRISE_TOKEN) aren't provisioned in GCP
-  # Secret Manager yet (tracked on PR #1 / REVIEW_NOTES.md), and per team discussion (Slack
-  # thread with Oliver Falvai, see this PR's description) that isn't a near-term priority: local
-  # verification is considered sufficient assurance for now, so wiring these into CI isn't worth
-  # the GCP setup work at this stage.
+  # TODO: Add the necessary credentials to the CI so it can run the tests:
+  # BITRISE_CODEPUSH_TEST_APP_ID / BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT / BITRISE_TOKEN
   #
-  # The `manual_test_` workflows below are real, working e2e tests — verified locally against the
-  # real CodePush API — just excluded from Unified CI's automatic `test_` sweep. Anyone with the
-  # three secrets in a local .bitrise.secrets.yml can run them directly:
-  #   bitrise run --config e2e/bitrise.yml --inventory e2e/.bitrise.secrets.yml manual_test_resolve_and_bundle_android
+  # Until then, run them locally with a .bitrise.secrets.yml containing the three secrets above:
+  # bitrise run --config e2e/bitrise.yml --inventory e2e/.bitrise.secrets.yml manual_test_resolve_and_bundle_android
 
   manual_test_resolve_and_bundle_android:
     description: |-
