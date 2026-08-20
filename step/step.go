@@ -17,7 +17,6 @@ import (
 
 const (
 	outputUpdateID    = "BITRISE_CODEPUSH_UPDATE_ID"
-	outputAppVersion  = "BITRISE_CODEPUSH_APP_VERSION"
 	outputPackagePath = "BITRISE_CODEPUSH_PACKAGE_PATH"
 )
 
@@ -67,7 +66,6 @@ type Config struct {
 
 type Result struct {
 	UpdateID    string
-	AppVersion  string
 	Status      string
 	PackagePath string
 	DeployDir   string
@@ -160,7 +158,6 @@ func (s Step) Run(cfg Config) (Result, error) {
 
 	return Result{
 		UpdateID:    pushResult.UpdateID,
-		AppVersion:  pushResult.AppVersion,
 		Status:      pushResult.Status,
 		PackagePath: pushResult.PackagePath,
 		DeployDir:   cfg.DeployDir,
@@ -172,9 +169,6 @@ func (s Step) Run(cfg Config) (Result, error) {
 func (s Step) ExportOutputs(result Result) error {
 	if err := s.exporter.ExportOutput(outputUpdateID, result.UpdateID); err != nil {
 		return fmt.Errorf("exporting %s: %w", outputUpdateID, err)
-	}
-	if err := s.exporter.ExportOutput(outputAppVersion, result.AppVersion); err != nil {
-		return fmt.Errorf("exporting %s: %w", outputAppVersion, err)
 	}
 
 	dest := filepath.Join(result.DeployDir, filepath.Base(result.PackagePath))

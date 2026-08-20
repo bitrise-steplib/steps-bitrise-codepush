@@ -95,12 +95,23 @@ inputs:
 - app_version:
   opts:
     title: Target app version
-    summary: The native app version this update targets (e.g. 1.2.0).
+    summary: The native app version(s) this update targets (e.g. 1.2.0, or a range like ~1.2.0).
     description: |-
-      The target native binary version for this update, e.g. `1.2.0`.
+      The target native binary version(s) this update applies to. This is usually your app's
+      marketing/short version string, not the build number.
 
-      Devices only receive this update if their installed native app version matches. This is
-      usually your app's marketing/short version string, not the build number.
+      Accepts an exact version or a range expression:
+
+      - Exact version: `1.2.3` — only devices on that exact binary version.
+      - Wildcard: `*` — any device, regardless of binary version.
+      - Partial version: `1.2.x` or `1.2` — any patch version within that major.minor (`1.2` is
+        equivalent to `>=1.2.0 <1.3.0`).
+      - Range: `1.2.3 - 1.2.7` (inclusive-inclusive) or `>=1.2.3 <1.2.7` (inclusive-exclusive).
+      - Semver operators: `~1.2.3` (equivalent to `>=1.2.3 <1.3.0`), `^1.2.3` (equivalent to
+        `>=1.2.3 <2.0.0`).
+
+      See [Target versions](https://docs.bitrise.io/en/release-management/codepush/creating-and-releasing-codepush-updates#target-versions)
+      for the full reference.
     is_required: true
 
 - project_dir: $BITRISE_SOURCE_DIR
@@ -184,10 +195,6 @@ outputs:
   opts:
     title: CodePush update ID
     summary: The package/update ID assigned to the pushed release.
-- BITRISE_CODEPUSH_APP_VERSION:
-  opts:
-    title: Target app version
-    summary: The native app version the pushed update targets.
 - BITRISE_CODEPUSH_PACKAGE_PATH:
   opts:
     title: Package path

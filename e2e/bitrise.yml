@@ -41,11 +41,6 @@ workflows:
               exit 1
             fi
 
-            if [ "$BITRISE_CODEPUSH_APP_VERSION" != "1.0.0" ]; then
-              echo "BITRISE_CODEPUSH_APP_VERSION expected 1.0.0, got: $BITRISE_CODEPUSH_APP_VERSION"
-              exit 1
-            fi
-
             if [ -z "$BITRISE_CODEPUSH_PACKAGE_PATH" ] || [ ! -f "$BITRISE_CODEPUSH_PACKAGE_PATH" ]; then
               echo "BITRISE_CODEPUSH_PACKAGE_PATH does not point to an existing file: $BITRISE_CODEPUSH_PACKAGE_PATH"
               exit 1
