@@ -22,9 +22,6 @@ const defaultServerURL = "https://api.bitrise.io"
 
 const codePushAPIPath = "/release-management/v2/code-push/v1"
 
-// stepUserAgentVersion identifies this step's requests to the CodePush API for server-side
-// logging/debugging: the VCS revision the running binary was built from, so a specific build can
-// be traced back to its source. Falls back to "unknown" if build info isn't available.
 func stepUserAgentVersion() string {
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
@@ -93,9 +90,6 @@ func (s Step) ProcessConfig() (Config, error) {
 	return cfg, nil
 }
 
-// Run resolves and validates the app/deployment/token against the CodePush API, then bundles the
-// JavaScript project and packages it into a zip. Resolution runs first so a bad credential or
-// deployment name fails fast, before spending time bundling.
 func (s Step) Run(cfg Config) (Result, error) {
 	ctx := context.Background()
 
@@ -142,8 +136,8 @@ func (s Step) Run(cfg Config) (Result, error) {
 	}, nil
 }
 
-// ExportOutputs exports the built package under $BITRISE_DEPLOY_DIR, so a subsequent "Deploy to
-// Bitrise.io" step picks it up automatically.
+// The package is copied under $BITRISE_DEPLOY_DIR so a subsequent "Deploy to Bitrise.io" step
+// picks it up automatically.
 func (s Step) ExportOutputs(result Result) error {
 	dest := filepath.Join(result.DeployDir, filepath.Base(result.PackagePath))
 	if err := s.exporter.ExportOutputFile(outputPackagePath, result.PackagePath, dest); err != nil {

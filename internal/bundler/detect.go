@@ -23,7 +23,6 @@ const (
 	ProjectTypeExpo
 )
 
-// String returns the display name of the project type.
 func (p ProjectType) String() string {
 	switch p {
 	case ProjectTypeReactNative:
@@ -76,9 +75,6 @@ type packageJSON struct {
 	DevDependencies map[string]string `json:"devDependencies"`
 }
 
-// DetectProject inspects the project directory and returns a ProjectConfig.
-// opts may be nil; when provided, GradleFile and PodFile override the default
-// paths used for Hermes auto-detection.
 func DetectProject(projectDir string, platform Platform, hermesMode HermesMode, opts *BundleOptions) (*ProjectConfig, error) {
 	absDir, err := filepath.Abs(projectDir)
 	if err != nil {
@@ -140,7 +136,6 @@ func DetectProject(projectDir string, platform Platform, hermesMode HermesMode, 
 	}, nil
 }
 
-// detectProjectType reads package.json and determines the project type.
 func detectProjectType(projectDir string) (ProjectType, error) {
 	pkgPath := filepath.Join(projectDir, "package.json")
 	data, err := os.ReadFile(pkgPath)
@@ -171,8 +166,6 @@ func detectProjectType(projectDir string) (ProjectType, error) {
 	return ProjectTypeUnknown, errors.New("could not detect project type: package.json does not list react-native or expo as a dependency")
 }
 
-// detectEntryFile searches for the JS entry file.
-// Priority: index.<platform>.js, then index.js, then package.json "main" field.
 func detectEntryFile(projectDir string, platform Platform) (string, error) {
 	platformSpecific := fmt.Sprintf("index.%s.js", platform)
 	candidates := []string{platformSpecific, "index.js"}
@@ -209,10 +202,8 @@ const (
 	hermesDisabled                        // explicitly disabled
 )
 
-// detectHermes checks the project for Hermes configuration.
-// If no explicit config is found, defaults to true for React Native >= 0.70
-// (Hermes became the default engine in that version).
-// gradleFile and podFile override the default build file paths for detection.
+// If no explicit config is found, defaults to true for React Native >= 0.70, where Hermes
+// became the default engine.
 func detectHermes(projectDir string, platform Platform, gradleFile, podFile string) bool {
 	var detection hermesDetection
 
@@ -236,8 +227,6 @@ func detectHermes(projectDir string, platform Platform, gradleFile, podFile stri
 	}
 }
 
-// isHermesDefaultVersion checks if the react-native version in package.json
-// is >= 0.70, where Hermes became the default JS engine.
 func isHermesDefaultVersion(projectDir string) bool {
 	pkgPath := filepath.Join(projectDir, "package.json")
 	data, err := os.ReadFile(pkgPath)
@@ -261,9 +250,6 @@ func isHermesDefaultVersion(projectDir string) bool {
 	return parseRNMajorMinor(rnVersion) >= 70
 }
 
-// parseRNMajorMinor extracts the minor version number from a React Native
-// version string. Returns the minor version (e.g., 72 for "0.72.0") or 0
-// if parsing fails. Handles semver ranges like "^0.72.0", "~0.72.0", ">=0.72.0".
 func parseRNMajorMinor(version string) int {
 	// Strip common semver prefixes
 	v := strings.TrimLeft(version, "^~>=<! ")
@@ -292,8 +278,6 @@ func parseRNMajorMinor(version string) int {
 	return 100
 }
 
-// detectHermesAndroid checks android/app/build.gradle for Hermes configuration.
-// If gradleFile is non-empty it is used instead of the default paths.
 func detectHermesAndroid(projectDir string, gradleFile string) hermesDetection {
 	var gradlePaths []string
 	if gradleFile != "" {
@@ -345,8 +329,6 @@ func detectHermesAndroid(projectDir string, gradleFile string) hermesDetection {
 	return hermesNotFound
 }
 
-// detectHermesIOS checks ios/Podfile for Hermes configuration.
-// If podFile is non-empty it is used instead of the default path.
 func detectHermesIOS(projectDir string, podFile string) hermesDetection {
 	podfilePath := podFile
 	if podfilePath == "" {
@@ -383,7 +365,6 @@ func detectHermesIOS(projectDir string, podFile string) hermesDetection {
 	return hermesNotFound
 }
 
-// findHermesc locates the hermesc binary in node_modules.
 func findHermesc(projectDir string) (string, error) {
 	osName := runtime.GOOS
 	archName := runtime.GOARCH
@@ -418,7 +399,6 @@ func findHermesc(projectDir string) (string, error) {
 	return "", errors.New("hermesc binary not found in node_modules")
 }
 
-// detectMetroConfig searches for metro.config.js or metro.config.ts.
 func detectMetroConfig(projectDir string) string {
 	candidates := []string{
 		filepath.Join(projectDir, "metro.config.js"),
@@ -441,8 +421,6 @@ var (
 	reBundleURLForResSwift = regexp.MustCompile(`bundleURL\(forResource:\s*"([^"]+)"`)
 )
 
-// detectBundleName returns the expected bundle filename from native project files.
-// Always returns a non-empty string; falls back to DefaultBundleName(platform).
 func detectBundleName(projectDir string, platform Platform, opts *BundleOptions) string {
 	var name string
 	switch platform {
@@ -457,8 +435,6 @@ func detectBundleName(projectDir string, platform Platform, opts *BundleOptions)
 	return name
 }
 
-// detectBundleNameAndroid scans android/app/build.gradle (and build.gradle.kts)
-// for bundleAssetName. Respects opts.GradleFile override (same as Hermes detection).
 func detectBundleNameAndroid(projectDir string, opts *BundleOptions) string {
 	var gradlePaths []string
 	if opts != nil && opts.GradleFile != "" {
@@ -485,8 +461,6 @@ func detectBundleNameAndroid(projectDir string, opts *BundleOptions) string {
 	return ""
 }
 
-// detectBundleNameIOS scans ios/AppDelegate.{m,mm,swift} for a custom bundle name.
-// Returns "" if no custom name is found; caller falls back to DefaultBundleName.
 func detectBundleNameIOS(projectDir string) string {
 	candidates := []string{
 		filepath.Join(projectDir, "ios", "AppDelegate.m"),

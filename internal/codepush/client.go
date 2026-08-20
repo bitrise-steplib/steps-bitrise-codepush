@@ -1,8 +1,3 @@
-// Ported from github.com/bitrise-io/bitrise-plugins-codepush-cli @ 4b586c72b61af87818445db251a60ee097b3f5bd
-// (internal/codepush/client.go). Trimmed to just ListDeployments (the only API call this layer of
-// the stack needs); the X-Bitrise-User-Agent identity string was changed from
-// "codepush-cli/<version>" to "bitrise-codepush-step/<version>" to identify requests made by this
-// Step.
 package codepush
 
 import (
@@ -14,7 +9,6 @@ import (
 	"net/url"
 )
 
-// HTTPClient implements Client using net/http.
 type HTTPClient struct {
 	BaseURL string
 	Token   string
@@ -22,7 +16,6 @@ type HTTPClient struct {
 	client  *http.Client
 }
 
-// NewHTTPClient creates a new HTTPClient.
 func NewHTTPClient(baseURL, token, version string) *HTTPClient {
 	if version == "" {
 		version = "unknown"
@@ -35,9 +28,7 @@ func NewHTTPClient(baseURL, token, version string) *HTTPClient {
 	}
 }
 
-// buildURL assembles a relative URL from a path and optional query parameters.
-// Path parameters must be escaped with url.PathEscape before being interpolated
-// into path. Query values are safely encoded by url.Values.Encode.
+// Path parameters must already be escaped with url.PathEscape by the caller.
 func buildURL(path string, params url.Values) string {
 	if len(params) == 0 {
 		return path
@@ -45,7 +36,6 @@ func buildURL(path string, params url.Values) string {
 	return path + "?" + params.Encode()
 }
 
-// ListDeployments returns all deployments for the given app.
 func (c *HTTPClient) ListDeployments(ctx context.Context, appID string) ([]Deployment, error) {
 	params := url.Values{}
 	params.Set("app_id", appID)

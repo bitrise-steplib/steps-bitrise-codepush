@@ -7,16 +7,10 @@ import (
 	"path/filepath"
 )
 
-// Run executes the full bundle pipeline:
-// 1. Detect project configuration
-// 2. Execute the appropriate bundler
-// 3. Compile with Hermes if applicable
 func Run(opts *BundleOptions, logger Logger) (*BundleResult, error) {
 	return RunWithExecutor(opts, &DefaultExecutor{}, logger)
 }
 
-// RunWithExecutor executes the full bundle pipeline with the given executor.
-// This allows tests to provide a mock executor.
 func RunWithExecutor(opts *BundleOptions, executor CommandExecutor, logger Logger) (*BundleResult, error) {
 	hermesMode, err := resolveRunOptions(opts)
 	if err != nil {

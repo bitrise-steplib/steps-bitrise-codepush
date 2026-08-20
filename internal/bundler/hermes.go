@@ -57,8 +57,6 @@ func (h *HermesCompiler) Compile(hermescPath string, bundlePath string, sourcema
 	return nil
 }
 
-// composeSourceMaps attempts to compose Metro and Hermes source maps.
-// This is a best-effort operation; failures are logged but not fatal.
 func (h *HermesCompiler) composeSourceMaps(bundlePath string, metroMapPath string, hermesMapPath string) {
 	projectDir := filepath.Dir(bundlePath)
 

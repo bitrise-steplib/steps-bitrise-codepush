@@ -1,4 +1,4 @@
-# Bitrise CodePush
+# Bitrise CodePush Publish
 
 [![Step changelog](https://shields.io/github/v/release/bitrise-steplib/steps-bitrise-codepush?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/steps-bitrise-codepush/releases)
 
@@ -10,20 +10,7 @@ Bundle React Native or Expo JavaScript and push it as an OTA update to Bitrise C
 Bundles the JavaScript code (and assets) of a React Native project and publishes it as an
 over-the-air (OTA) update to a Bitrise CodePush deployment.
 
-This is the officially supported way to publish CodePush updates from a Bitrise build. It
-replaces installing the `bitrise-plugins-codepush-cli` CLI plugin at runtime or shelling out to
-the `release-management-recipes` reference script: this Step ports the same publishing logic
-natively, with typed inputs, secret handling, and artifact export.
-
-### Current status
-
-This Step is being built incrementally across a stack of PRs. **This revision bundles the
-JavaScript project, validates your CodePush app/deployment/token, and exports the built
-package** — it does not yet upload to CodePush. That lands in follow-up PRs (see the
-[project brief](https://bitrise.atlassian.net/wiki/spaces/RD/pages/5151653927) for the full
-scope).
-
-### Configuring the Step (current scope)
+### Configuring the Step
 
 1. Add the Step to a Workflow after your JS dependencies are installed (or leave
    **Skip dependency install** unchecked and let the Step run the install for you).
