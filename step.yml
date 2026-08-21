@@ -8,10 +8,12 @@ description: |-
 
   1. Add the Step to a Workflow after your JS dependencies are installed (or leave
      **Skip dependency install** unchecked and let the Step run the install for you).
-  2. Set **Target platform** to `ios` or `android`. Each run only bundles for one platform.
+  2. Set **Target platform** to `ios` or `android`. Each run only bundles and publishes for one
+     platform; to update both iOS and Android, add the Step twice, once per platform.
   3. Set **CodePush app ID** and **Deployment** (name, e.g. `Staging`, or UUID) for the app you're
-     working with.
-  4. Set **Bitrise API token** as a [Secret](https://devcenter.bitrise.io/en/builds/env-vars-and-secrets/adding-and-managing-secrets.html).
+     publishing to.
+  4. Set **Target app version** to the native app version this update targets (e.g. `1.2.0`).
+  5. Set **Bitrise API token** as a [Secret](https://devcenter.bitrise.io/en/builds/env-vars-and-secrets/adding-and-managing-secrets.html).
 
   The Step auto-detects your project's entry file and Hermes bytecode configuration; overrides
   are available under **Bundling options** if auto-detection doesn't fit your project layout.
@@ -90,6 +92,28 @@ inputs:
     is_required: true
     is_sensitive: true
 
+- app_version:
+  opts:
+    title: Target app version
+    summary: The native app version(s) this update targets (e.g. 1.2.0, or a range like ~1.2.0).
+    description: |-
+      The target native binary version(s) this update applies to. This is usually your app's
+      marketing/short version string, not the build number.
+
+      Accepts an exact version or a range expression:
+
+      - Exact version: `1.2.3` — only devices on that exact binary version.
+      - Wildcard: `*` — any device, regardless of binary version.
+      - Partial version: `1.2.x` or `1.2` — any patch version within that major.minor (`1.2` is
+        equivalent to `>=1.2.0 <1.3.0`).
+      - Range: `1.2.3 - 1.2.7` (inclusive-inclusive) or `>=1.2.3 <1.2.7` (inclusive-exclusive).
+      - Semver operators: `~1.2.3` (equivalent to `>=1.2.3 <1.3.0`), `^1.2.3` (equivalent to
+        `>=1.2.3 <2.0.0`).
+
+      See [Target versions](https://docs.bitrise.io/en/release-management/codepush/creating-and-releasing-codepush-updates#target-versions)
+      for the full reference.
+    is_required: true
+
 - project_dir: $BITRISE_SOURCE_DIR
   opts:
     title: Project directory
@@ -167,6 +191,10 @@ inputs:
     category: Advanced
 
 outputs:
+- BITRISE_CODEPUSH_UPDATE_ID:
+  opts:
+    title: CodePush update ID
+    summary: The package/update ID assigned to the pushed release.
 - BITRISE_CODEPUSH_PACKAGE_PATH:
   opts:
     title: Package path

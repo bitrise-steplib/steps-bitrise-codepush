@@ -14,10 +14,12 @@ over-the-air (OTA) update to a Bitrise CodePush deployment.
 
 1. Add the Step to a Workflow after your JS dependencies are installed (or leave
    **Skip dependency install** unchecked and let the Step run the install for you).
-2. Set **Target platform** to `ios` or `android`. Each run only bundles for one platform.
+2. Set **Target platform** to `ios` or `android`. Each run only bundles and publishes for one
+   platform; to update both iOS and Android, add the Step twice, once per platform.
 3. Set **CodePush app ID** and **Deployment** (name, e.g. `Staging`, or UUID) for the app you're
-   working with.
-4. Set **Bitrise API token** as a [Secret](https://devcenter.bitrise.io/en/builds/env-vars-and-secrets/adding-and-managing-secrets.html).
+   publishing to.
+4. Set **Target app version** to the native app version this update targets (e.g. `1.2.0`).
+5. Set **Bitrise API token** as a [Secret](https://devcenter.bitrise.io/en/builds/env-vars-and-secrets/adding-and-managing-secrets.html).
 
 The Step auto-detects your project's entry file and Hermes bytecode configuration; overrides
 are available under **Bundling options** if auto-detection doesn't fit your project layout.
@@ -51,6 +53,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | `app_id` | The UUID of the Bitrise CodePush app this update targets.  Find this on your app's CodePush page, or via `CODEPUSH_APP_ID` if you already export it as a Workflow env var. | required | `$CODEPUSH_APP_ID` |
 | `deployment` | The name (e.g. `Staging`, `Production`) or UUID of the deployment to work with. | required |  |
 | `api_token` | A Bitrise API access token with access to the app above.  Prefer a **Workspace API token**: unlike a personal access token, it isn't tied to any one team member's account, so it keeps working if that person leaves or their access changes. A **Personal Access Token** (generated under **Account Settings > Security** on [bitrise.io](https://app.bitrise.io/me/account/security)) also works, but ties this Step's ability to publish updates to that individual's account. | required, sensitive |  |
+| `app_version` | The target native binary version(s) this update applies to. This is usually your app's marketing/short version string, not the build number.  Accepts an exact version or a range expression:  - Exact version: `1.2.3` — only devices on that exact binary version. - Wildcard: `*` — any device, regardless of binary version. - Partial version: `1.2.x` or `1.2` — any patch version within that major.minor (`1.2` is   equivalent to `>=1.2.0 <1.3.0`). - Range: `1.2.3 - 1.2.7` (inclusive-inclusive) or `>=1.2.3 <1.2.7` (inclusive-exclusive). - Semver operators: `~1.2.3` (equivalent to `>=1.2.3 <1.3.0`), `^1.2.3` (equivalent to   `>=1.2.3 <2.0.0`).  See [Target versions](https://docs.bitrise.io/en/release-management/codepush/creating-and-releasing-codepush-updates#target-versions) for the full reference. | required |  |
 | `project_dir` | The root directory of the React Native or Expo project to bundle, containing its `package.json`. |  | `$BITRISE_SOURCE_DIR` |
 | `entry_file` | Path to the JavaScript entry file, relative to **Project directory**.  Leave empty to auto-detect (`index.<platform>.js`, then `index.js`, then the `main` field in `package.json`). |  |  |
 | `hermes` | Controls whether the JavaScript bundle is compiled to Hermes bytecode after bundling.  - `auto`: detect from the project's `android/app/build.gradle` / `ios/Podfile`, falling   back to "enabled" for React Native >= 0.70 (where Hermes is the default engine) if no   explicit setting is found. - `on`: always compile to Hermes bytecode. - `off`: never compile to Hermes bytecode.  The compiled bundle must match the Hermes/JSC engine the native app was built with, or the update will fail to load on-device. |  | `auto` |
@@ -64,6 +67,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 
 | Environment Variable | Description |
 | --- | --- |
+| `BITRISE_CODEPUSH_UPDATE_ID` | The package/update ID assigned to the pushed release. |
 | `BITRISE_CODEPUSH_PACKAGE_PATH` | Local path to the built update package (a `.zip`). The Step copies it under `$BITRISE_DEPLOY_DIR`, so a subsequent **Deploy to Bitrise.io** Step picks it up automatically and it appears on the build's Artifacts tab. |
 </details>
 

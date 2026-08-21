@@ -12,8 +12,9 @@ workflows:
         inputs:
         - workflow: e2e
 
-  # For local debugging convenience. No CodePush credentials needed at this stage of the stack —
-  # this revision only bundles and packages, it doesn't upload anywhere yet.
+  # For local debugging convenience. Fill in CODEPUSH_APP_ID, CODEPUSH_DEPLOYMENT, and
+  # BITRISE_API_TOKEN in a .bitrise.secrets.yml next to this file, then run:
+  #   bitrise run sample
   sample:
     envs:
     - TEST_REPO_URL: https://github.com/naveen-bitrise/Bitrise-ReactNative-CodePush
@@ -36,6 +37,10 @@ workflows:
         inputs:
         - project_dir: ./_tmp
         - platform: android
+        - app_id: $CODEPUSH_APP_ID
+        - deployment: $CODEPUSH_DEPLOYMENT
+        - app_version: 1.0.0
+        - api_token: $BITRISE_API_TOKEN
 
   generate_readme:
     steps:
