@@ -96,7 +96,7 @@ workflows:
     after_run:
     - _check_outputs
 
-  manual_test_push_ios_mandatory_disabled:
+  test_push_ios_mandatory_disabled:
     description: |-
       Push an iOS update with mandatory=true and disabled_after_upload=true, verifying those
       flags don't break the upload/poll flow.
@@ -117,7 +117,7 @@ workflows:
     after_run:
     - _check_outputs
 
-  manual_test_push_ios_fractional_rollout:
+  test_push_ios_fractional_rollout:
     description: |-
       Push an iOS update with a fractional rollout_percentage (2.5), verifying the API accepts
       non-integer rollout values end to end.
