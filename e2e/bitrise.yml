@@ -7,13 +7,9 @@ app:
   # with real android/ios project files for Hermes auto-detection to exercise.
   - TEST_REPO_URL: https://github.com/naveen-bitrise/Bitrise-ReactNative-CodePush
   - TEST_REPO_BRANCH: main
-  # A CodePush app + deployment dedicated to this Step's e2e tests (neither is sensitive, hence
-  # hardcoded below). Only used by the manual_test_ workflows below (see the comment there for
-  # why): BITRISE_TOKEN isn't provisioned in GCP Secret Manager yet, so these are never run by an
-  # automatic CI run — only by a developer running bitrise run with a local .bitrise.secrets.yml.
   - BITRISE_CODEPUSH_TEST_APP_ID: 1c0b0bff-83e0-40a9-9041-59a97e1b4174
   - BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT: Testing
-  - BITRISE_TOKEN: $BITRISE_TOKEN
+  - CODEPUSH_STEP_TEST_WAT: $CODEPUSH_STEP_TEST_WAT
 
 workflows:
   _setup:
@@ -55,16 +51,11 @@ workflows:
 
             echo "Outputs OK: package=$BITRISE_CODEPUSH_PACKAGE_PATH"
 
-  # TODO: Add BITRISE_TOKEN to the CI so it can run the tests.
-  #
-  # Until then, run them locally with a .bitrise.secrets.yml containing that secret:
-  # bitrise run --config e2e/bitrise.yml --inventory e2e/.bitrise.secrets.yml manual_test_resolve_and_bundle_android
-
   manual_test_resolve_and_bundle_android:
     description: |-
       Resolve app_id/deployment/api_token against the real CodePush API, then bundle for Android
       (auto-detecting Hermes and the package manager) and export the package under
-      $BITRISE_DEPLOY_DIR. Requires real credentials — see the comment above.
+      $BITRISE_DEPLOY_DIR.
     before_run:
     - _setup
     steps:
@@ -75,7 +66,7 @@ workflows:
         - platform: android
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
-        - api_token: $BITRISE_TOKEN
+        - api_token: $CODEPUSH_STEP_TEST_WAT
     after_run:
     - _check_outputs
 
@@ -83,7 +74,7 @@ workflows:
     description: |-
       Same as manual_test_resolve_and_bundle_android but for iOS, with Hermes explicitly
       disabled — exercises the hermes: off path (skips hermesc entirely) rather than just
-      auto-detection. Requires real credentials — see the comment above.
+      auto-detection.
     before_run:
     - _setup
     steps:
@@ -95,6 +86,6 @@ workflows:
         - hermes: "off"
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
-        - api_token: $BITRISE_TOKEN
+        - api_token: $CODEPUSH_STEP_TEST_WAT
     after_run:
     - _check_outputs
