@@ -51,7 +51,7 @@ workflows:
 
             echo "Outputs OK: package=$BITRISE_CODEPUSH_PACKAGE_PATH"
 
-  manual_test_resolve_and_bundle_android:
+  test_resolve_and_bundle_android:
     description: |-
       Resolve app_id/deployment/api_token against the real CodePush API, then bundle for Android
       (auto-detecting Hermes and the package manager) and export the package under
@@ -70,9 +70,9 @@ workflows:
     after_run:
     - _check_outputs
 
-  manual_test_resolve_and_bundle_ios_hermes_off:
+  test_resolve_and_bundle_ios_hermes_off:
     description: |-
-      Same as manual_test_resolve_and_bundle_android but for iOS, with Hermes explicitly
+      Same as test_resolve_and_bundle_android but for iOS, with Hermes explicitly
       disabled — exercises the hermes: off path (skips hermesc entirely) rather than just
       auto-detection.
     before_run:
