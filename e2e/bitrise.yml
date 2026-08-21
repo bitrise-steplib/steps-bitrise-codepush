@@ -99,7 +99,7 @@ workflows:
   manual_test_push_ios_mandatory_disabled:
     description: |-
       Push an iOS update with mandatory=true and disabled_after_upload=true, verifying those
-      flags don't break the upload/poll flow. Requires real credentials — see the comment above.
+      flags don't break the upload/poll flow.
     before_run:
     - _setup
     steps:
@@ -113,6 +113,27 @@ workflows:
         - app_version: 1.0.0
         - api_token: $BITRISE_TOKEN
         - mandatory: "true"
+        - disabled_after_upload: "true"
+    after_run:
+    - _check_outputs
+
+  manual_test_push_ios_fractional_rollout:
+    description: |-
+      Push an iOS update with a fractional rollout_percentage (2.5), verifying the API accepts
+      non-integer rollout values end to end.
+    before_run:
+    - _setup
+    steps:
+    - path::./:
+        title: Run Bitrise CodePush
+        inputs:
+        - project_dir: ./_tmp
+        - platform: ios
+        - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
+        - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - app_version: 1.0.0
+        - api_token: $BITRISE_TOKEN
+        - rollout_percentage: "2.5"
         - disabled_after_upload: "true"
     after_run:
     - _check_outputs

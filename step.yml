@@ -121,10 +121,12 @@ inputs:
     title: Rollout percentage
     summary: Percentage of devices (0-100) that receive the update immediately.
     description: |-
-      Percentage of devices, between 0 and 100, that receive this update immediately.
+      Percentage of devices, between 0 and 100, that receive this update immediately. Accepts
+      fractional values (e.g. `33.3`).
 
       Leave at 100 to roll the update out to all devices right away, or set a lower value to
-      ramp up a staged rollout over time (adjustable later from the CodePush dashboard).
+      ramp up a staged rollout over time (adjustable later on the details page of the CodePush
+      update in the Release Management app).
 
 - mandatory: "false"
   opts:
@@ -143,8 +145,8 @@ inputs:
     summary: Upload the update without activating it for devices yet.
     description: |-
       When enabled, the update is uploaded but not served to any device until manually enabled
-      later (e.g. from the CodePush dashboard). Useful for a "dark push" you plan to enable
-      after separate verification.
+      later on the details page of the CodePush update in the Release Management app. Useful for
+      a "dark push" you plan to enable after separate verification.
     value_options:
     - "true"
     - "false"
@@ -154,7 +156,7 @@ inputs:
     title: Update description
     summary: Release notes shown for this update.
     description: |-
-      Optional release notes / description for this update.
+      Optional release notes / description for this update. Plain text only.
 
 - project_dir: $BITRISE_SOURCE_DIR
   opts:
