@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/bitrise-io/go-steputils/v2 v2.0.0-alpha.52
 	github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.36
+	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.11.1
 )
 

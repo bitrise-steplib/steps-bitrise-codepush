@@ -121,8 +121,6 @@ func (b *ReactNativeBundler) buildArgs(config *ProjectConfig, opts *BundleOption
 	return args
 }
 
-// resolveSourcemapPath returns the absolute sourcemap path based on bundle options.
-// Returns an empty string when sourcemaps are disabled.
 func resolveSourcemapPath(opts *BundleOptions, bundlePath string) (string, error) {
 	if !opts.Sourcemap {
 		return "", nil

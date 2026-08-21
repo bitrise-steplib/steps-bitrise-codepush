@@ -4,10 +4,12 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   # A modern (RN 0.78) sample app that already integrates @code-push-next/react-native-code-push,
-  # with real android/ios project files for Hermes auto-detection to exercise. No CodePush
-  # credentials needed at this stage of the stack: this revision only bundles and packages.
+  # with real android/ios project files for Hermes auto-detection to exercise.
   - TEST_REPO_URL: https://github.com/naveen-bitrise/Bitrise-ReactNative-CodePush
   - TEST_REPO_BRANCH: main
+  - BITRISE_CODEPUSH_TEST_APP_ID: 1c0b0bff-83e0-40a9-9041-59a97e1b4174
+  - BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT: Testing
+  - CODEPUSH_STEP_TEST_WAT: $CODEPUSH_STEP_TEST_WAT
 
 workflows:
   _setup:
@@ -49,11 +51,11 @@ workflows:
 
             echo "Outputs OK: package=$BITRISE_CODEPUSH_PACKAGE_PATH"
 
-  # `test_` prefix is used by unified CI to filter tests to run.
-  test_bundle_android_auto_hermes:
+  test_resolve_and_bundle_android:
     description: |-
-      Bundle for Android from a plain React Native project, auto-detecting Hermes and the package
-      manager, and export the package under $BITRISE_DEPLOY_DIR. No CodePush credentials needed.
+      Resolve app_id/deployment/api_token against the real CodePush API, then bundle for Android
+      (auto-detecting Hermes and the package manager) and export the package under
+      $BITRISE_DEPLOY_DIR.
     before_run:
     - _setup
     steps:
@@ -62,13 +64,17 @@ workflows:
         inputs:
         - project_dir: ./_tmp
         - platform: android
+        - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
+        - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - api_token: $CODEPUSH_STEP_TEST_WAT
     after_run:
     - _check_outputs
 
-  test_bundle_ios_hermes_off:
+  test_resolve_and_bundle_ios_hermes_off:
     description: |-
-      Same as test_bundle_android_auto_hermes but for iOS, with Hermes explicitly disabled —
-      exercises the hermes: off path (skips hermesc entirely) rather than just auto-detection.
+      Same as test_resolve_and_bundle_android but for iOS, with Hermes explicitly
+      disabled — exercises the hermes: off path (skips hermesc entirely) rather than just
+      auto-detection.
     before_run:
     - _setup
     steps:
@@ -78,5 +84,8 @@ workflows:
         - project_dir: ./_tmp
         - platform: ios
         - hermes: "off"
+        - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
+        - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
+        - api_token: $CODEPUSH_STEP_TEST_WAT
     after_run:
     - _check_outputs

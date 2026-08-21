@@ -1,18 +1,39 @@
 package step
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
+	"runtime/debug"
+	"strings"
 
 	"github.com/bitrise-io/go-steputils/v2/export"
 	"github.com/bitrise-io/go-steputils/v2/stepconf"
 	"github.com/bitrise-io/go-utils/v2/log"
 
 	"github.com/bitrise-steplib/steps-bitrise-codepush/internal/bundler"
+	"github.com/bitrise-steplib/steps-bitrise-codepush/internal/codepush"
 	ziputil "github.com/bitrise-steplib/steps-bitrise-codepush/internal/zip"
 )
 
 const outputPackagePath = "BITRISE_CODEPUSH_PACKAGE_PATH"
+
+const defaultServerURL = "https://api.bitrise.io"
+
+const codePushAPIPath = "/release-management/v2/code-push/v1"
+
+func stepUserAgentVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "unknown"
+	}
+	for _, setting := range info.Settings {
+		if setting.Key == "vcs.revision" {
+			return setting.Value
+		}
+	}
+	return "unknown"
+}
 
 type Config struct {
 	ProjectDir            string `env:"project_dir,dir"`
@@ -21,6 +42,11 @@ type Config struct {
 	BundleName            string `env:"bundle_name"`
 	HermesMode            string `env:"hermes,opt[auto,on,off]"`
 	SkipDependencyInstall bool   `env:"skip_dependency_install,opt[true,false]"`
+
+	AppID      string          `env:"app_id,required"`
+	Deployment string          `env:"deployment,required"`
+	APIToken   stepconf.Secret `env:"api_token,required"`
+	ServerURL  string          `env:"server_url"`
 
 	DeployDir string `env:"BITRISE_DEPLOY_DIR,dir"`
 
@@ -56,10 +82,25 @@ func (s Step) ProcessConfig() (Config, error) {
 	stepconf.Print(cfg)
 	s.logger.Println()
 
+	if cfg.ServerURL == "" {
+		cfg.ServerURL = defaultServerURL
+	}
+	cfg.ServerURL = strings.TrimRight(cfg.ServerURL, "/")
+
 	return cfg, nil
 }
 
 func (s Step) Run(cfg Config) (Result, error) {
+	ctx := context.Background()
+
+	client := codepush.NewHTTPClient(cfg.ServerURL+codePushAPIPath, string(cfg.APIToken), stepUserAgentVersion())
+
+	s.logger.Infof("Resolving CodePush app and deployment")
+	if _, err := codepush.ResolveDeployment(ctx, client, cfg.AppID, cfg.Deployment, s.logger); err != nil {
+		return Result{}, fmt.Errorf("resolving deployment: %w", err)
+	}
+	s.logger.Donef("App and deployment resolved")
+
 	bundleOpts := &bundler.BundleOptions{
 		Platform:    bundler.Platform(cfg.Platform),
 		EntryFile:   cfg.EntryFile,
@@ -72,6 +113,7 @@ func (s Step) Run(cfg Config) (Result, error) {
 		SkipInstall: cfg.SkipDependencyInstall,
 	}
 
+	s.logger.Println()
 	s.logger.Infof("Bundling JavaScript")
 	bundleResult, err := bundler.Run(bundleOpts, s.logger)
 	if err != nil {
@@ -94,8 +136,8 @@ func (s Step) Run(cfg Config) (Result, error) {
 	}, nil
 }
 
-// ExportOutputs exports the built package under $BITRISE_DEPLOY_DIR, so a subsequent "Deploy to
-// Bitrise.io" step picks it up automatically.
+// The package is copied under $BITRISE_DEPLOY_DIR so a subsequent "Deploy to Bitrise.io" step
+// picks it up automatically.
 func (s Step) ExportOutputs(result Result) error {
 	dest := filepath.Join(result.DeployDir, filepath.Base(result.PackagePath))
 	if err := s.exporter.ExportOutputFile(outputPackagePath, result.PackagePath, dest); err != nil {

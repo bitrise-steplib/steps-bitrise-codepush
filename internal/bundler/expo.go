@@ -94,9 +94,6 @@ func (b *ExpoBundler) buildArgs(config *ProjectConfig, opts *BundleOptions, outp
 	return args
 }
 
-// resolveExpoBundleName returns the bundle filename the CodePush SDK expects to find
-// in the zip. Priority: opts.BundleName (--bundle-name flag) > config.BundleName
-// (auto-detected from native project files) > DefaultBundleName.
 func resolveExpoBundleName(config *ProjectConfig, opts *BundleOptions) string {
 	if opts.BundleName != "" {
 		return opts.BundleName
@@ -107,10 +104,6 @@ func resolveExpoBundleName(config *ProjectConfig, opts *BundleOptions) string {
 	return DefaultBundleName(config.Platform)
 }
 
-// sourcemapPathForExpo returns the sourcemap output path for expo export:embed.
-// If SourcemapOutput is explicitly set, that path is used (resolved to absolute
-// against ProjectDir if relative); otherwise the map is placed next to the
-// bundle at bundlePath+".map".
 func sourcemapPathForExpo(opts *BundleOptions, bundlePath string) string {
 	if opts.SourcemapOutput != "" {
 		if filepath.IsAbs(opts.SourcemapOutput) {

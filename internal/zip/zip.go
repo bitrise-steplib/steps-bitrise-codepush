@@ -47,9 +47,6 @@ func addFileToZip(w *zip.Writer, baseDir string) filepath.WalkFunc {
 	}
 }
 
-// Directory creates a zip archive from the contents of srcDir.
-// The zip file is created as a sibling to srcDir with a .zip extension.
-// Returns the path to the created zip file.
 func Directory(srcDir string) (string, error) {
 	absDir, err := filepath.Abs(srcDir)
 	if err != nil {
