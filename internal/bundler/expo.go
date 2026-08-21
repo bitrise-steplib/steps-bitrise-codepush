@@ -28,17 +28,7 @@ func (b *ExpoBundler) Bundle(config *ProjectConfig, opts *BundleOptions) (*Bundl
 	bundleName := resolveExpoBundleName(config, opts)
 	bundlePath := filepath.Join(outputDir, bundleName)
 
-	var mapPath string
-	if opts.Sourcemap || opts.SourcemapOutput != "" {
-		mapPath = sourcemapPathForExpo(opts, bundlePath)
-		if opts.SourcemapOutput != "" {
-			if err := ensureDir(filepath.Dir(mapPath)); err != nil {
-				return nil, fmt.Errorf("creating sourcemap output directory: %w", err)
-			}
-		}
-	}
-
-	args := b.buildArgs(config, opts, outputDir, bundlePath, mapPath)
+	args := b.buildArgs(config, opts, outputDir, bundlePath)
 
 	b.logger.Infof("Bundling %s (expo)", opts.Platform)
 	if err := b.executor.Run(config.ProjectDir, os.Stdout, os.Stderr, "npx", args...); err != nil {
@@ -57,16 +47,10 @@ func (b *ExpoBundler) Bundle(config *ProjectConfig, opts *BundleOptions) (*Bundl
 		Platform:      opts.Platform,
 	}
 
-	if mapPath != "" {
-		if _, err := os.Stat(mapPath); err == nil {
-			result.SourcemapPath = mapPath
-		}
-	}
-
 	return result, nil
 }
 
-func (b *ExpoBundler) buildArgs(config *ProjectConfig, opts *BundleOptions, outputDir, bundlePath, mapPath string) []string {
+func (b *ExpoBundler) buildArgs(config *ProjectConfig, opts *BundleOptions, outputDir, bundlePath string) []string {
 	args := []string{
 		"expo", "export:embed",
 		"--entry-file", config.EntryFile,
@@ -85,10 +69,6 @@ func (b *ExpoBundler) buildArgs(config *ProjectConfig, opts *BundleOptions, outp
 		args = append(args, "--bytecode")
 	}
 
-	if mapPath != "" {
-		args = append(args, "--sourcemap-output", mapPath)
-	}
-
 	args = append(args, opts.ExtraBundlerOpts...)
 
 	return args
@@ -102,14 +82,4 @@ func resolveExpoBundleName(config *ProjectConfig, opts *BundleOptions) string {
 		return config.BundleName
 	}
 	return DefaultBundleName(config.Platform)
-}
-
-func sourcemapPathForExpo(opts *BundleOptions, bundlePath string) string {
-	if opts.SourcemapOutput != "" {
-		if filepath.IsAbs(opts.SourcemapOutput) {
-			return opts.SourcemapOutput
-		}
-		return filepath.Join(opts.ProjectDir, opts.SourcemapOutput)
-	}
-	return bundlePath + ".map"
 }

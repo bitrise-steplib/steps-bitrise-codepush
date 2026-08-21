@@ -7,10 +7,9 @@ import (
 )
 
 type bundlePaths struct {
-	outputDir     string
-	bundlePath    string
-	assetsDir     string
-	sourcemapPath string
+	outputDir  string
+	bundlePath string
+	assetsDir  string
 }
 
 // ReactNativeBundler bundles using "npx react-native bundle" (Metro bundler).
@@ -41,16 +40,10 @@ func (b *ReactNativeBundler) Bundle(config *ProjectConfig, opts *BundleOptions) 
 
 	bundlePath := filepath.Join(outputDir, bundleName)
 
-	sourcemapPath, err := resolveSourcemapPath(opts, bundlePath)
-	if err != nil {
-		return nil, err
-	}
-
 	paths := bundlePaths{
-		outputDir:     outputDir,
-		bundlePath:    bundlePath,
-		assetsDir:     assetsDir,
-		sourcemapPath: sourcemapPath,
+		outputDir:  outputDir,
+		bundlePath: bundlePath,
+		assetsDir:  assetsDir,
 	}
 	args := b.buildArgs(config, opts, paths)
 
@@ -69,12 +62,6 @@ func (b *ReactNativeBundler) Bundle(config *ProjectConfig, opts *BundleOptions) 
 		OutputDir:   outputDir,
 		ProjectType: ProjectTypeReactNative,
 		Platform:    opts.Platform,
-	}
-
-	if sourcemapPath != "" {
-		if _, err := os.Stat(sourcemapPath); err == nil {
-			result.SourcemapPath = sourcemapPath
-		}
 	}
 
 	return result, nil
@@ -100,10 +87,6 @@ func (b *ReactNativeBundler) buildArgs(config *ProjectConfig, opts *BundleOption
 		"--assets-dest", paths.assetsDir,
 	}
 
-	if paths.sourcemapPath != "" {
-		args = append(args, "--sourcemap-output", paths.sourcemapPath)
-	}
-
 	if opts.ResetCache {
 		args = append(args, "--reset-cache")
 	}
@@ -119,21 +102,4 @@ func (b *ReactNativeBundler) buildArgs(config *ProjectConfig, opts *BundleOption
 	args = append(args, opts.ExtraBundlerOpts...)
 
 	return args
-}
-
-func resolveSourcemapPath(opts *BundleOptions, bundlePath string) (string, error) {
-	if !opts.Sourcemap {
-		return "", nil
-	}
-	if opts.SourcemapOutput == "" {
-		return bundlePath + ".map", nil
-	}
-	absPath := opts.SourcemapOutput
-	if !filepath.IsAbs(absPath) {
-		absPath = filepath.Join(opts.ProjectDir, absPath)
-	}
-	if err := ensureDir(filepath.Dir(absPath)); err != nil {
-		return "", fmt.Errorf("creating sourcemap output directory: %w", err)
-	}
-	return absPath, nil
 }

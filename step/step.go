@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime/debug"
-	"strings"
 
 	"github.com/bitrise-io/go-steputils/v2/export"
 	"github.com/bitrise-io/go-steputils/v2/stepconf"
@@ -48,7 +47,6 @@ type Config struct {
 	AppID      string          `env:"app_id,required"`
 	Deployment string          `env:"deployment,required"`
 	APIToken   stepconf.Secret `env:"api_token,required"`
-	ServerURL  string          `env:"server_url"`
 
 	AppVersion          string  `env:"app_version,required"`
 	Description         string  `env:"description"`
@@ -97,11 +95,6 @@ func (s Step) ProcessConfig() (Config, error) {
 		return Config{}, fmt.Errorf("rollout_percentage must be a number between 0 and 100, got %g", cfg.RolloutPercentage)
 	}
 
-	if cfg.ServerURL == "" {
-		cfg.ServerURL = defaultServerURL
-	}
-	cfg.ServerURL = strings.TrimRight(cfg.ServerURL, "/")
-
 	stepconf.Print(cfg)
 	s.logger.Println()
 
@@ -113,7 +106,7 @@ func (s Step) ProcessConfig() (Config, error) {
 func (s Step) Run(cfg Config) (Result, error) {
 	ctx := context.Background()
 
-	client := codepush.NewHTTPClient(cfg.ServerURL+codePushAPIPath, string(cfg.APIToken), stepUserAgentVersion())
+	client := codepush.NewHTTPClient(defaultServerURL+codePushAPIPath, string(cfg.APIToken), stepUserAgentVersion())
 
 	s.logger.Infof("Resolving CodePush app and deployment")
 	if _, err := codepush.ResolveDeployment(ctx, client, cfg.AppID, cfg.Deployment, s.logger); err != nil {
@@ -127,7 +120,6 @@ func (s Step) Run(cfg Config) (Result, error) {
 		OutputDir:   bundler.DefaultOutputDir,
 		BundleName:  cfg.BundleName,
 		ResetCache:  true,
-		Sourcemap:   false,
 		HermesMode:  bundler.HermesMode(cfg.HermesMode),
 		ProjectDir:  cfg.ProjectDir,
 		SkipInstall: cfg.SkipDependencyInstall,

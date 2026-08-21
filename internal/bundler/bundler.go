@@ -21,20 +21,6 @@ type Logger interface {
 // other name produces a hash mismatch and the signed update is rejected.
 const DefaultOutputDir = "./CodePush"
 
-func ValidatePlatform(p Platform) error {
-	if p != PlatformIOS && p != PlatformAndroid {
-		return fmt.Errorf("platform must be 'ios' or 'android', got %q", p)
-	}
-	return nil
-}
-
-func ValidateHermesMode(h HermesMode) error {
-	if h != HermesModeAuto && h != HermesModeOn && h != HermesModeOff {
-		return fmt.Errorf("hermes mode must be 'auto', 'on', or 'off', got %q", h)
-	}
-	return nil
-}
-
 type BundleOptions struct {
 	Platform         Platform
 	EntryFile        string
@@ -43,8 +29,6 @@ type BundleOptions struct {
 	Dev              bool
 	Minify           bool // Expo only: pass --minify to expo export:embed
 	ResetCache       bool // pass --reset-cache to the bundler (Metro/expo export:embed)
-	Sourcemap        bool
-	SourcemapOutput  string // when set, overrides the auto-derived sourcemap path and implies Sourcemap=true
 	HermesMode       HermesMode
 	ExtraBundlerOpts []string
 	ExtraHermesFlags []string
@@ -58,7 +42,6 @@ type BundleOptions struct {
 type BundleResult struct {
 	BundlePath    string
 	AssetsDir     string
-	SourcemapPath string
 	OutputDir     string
 	HermesApplied bool
 	ProjectType   ProjectType
