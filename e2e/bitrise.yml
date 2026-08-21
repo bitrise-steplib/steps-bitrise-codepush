@@ -111,7 +111,7 @@ workflows:
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
         - app_version: 1.0.0
-        - api_token: $BITRISE_TOKEN
+        - api_token: $CODEPUSH_STEP_TEST_WAT
         - mandatory: "true"
         - disabled_after_upload: "true"
     after_run:
@@ -132,7 +132,7 @@ workflows:
         - app_id: $BITRISE_CODEPUSH_TEST_APP_ID
         - deployment: $BITRISE_CODEPUSH_TEST_STAGING_DEPLOYMENT
         - app_version: 1.0.0
-        - api_token: $BITRISE_TOKEN
+        - api_token: $CODEPUSH_STEP_TEST_WAT
         - rollout_percentage: "2.5"
         - disabled_after_upload: "true"
     after_run:
