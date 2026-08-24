@@ -72,10 +72,6 @@ func resolveRunOptions(opts *BundleOptions) (HermesMode, error) {
 		opts.OutputDir = DefaultOutputDir
 	}
 
-	if opts.SourcemapOutput != "" {
-		opts.Sourcemap = true
-	}
-
 	hermesMode := opts.HermesMode
 	if hermesMode == "" {
 		hermesMode = HermesModeAuto
@@ -92,7 +88,7 @@ func compileWithHermes(config *ProjectConfig, result *BundleResult, extraFlags [
 	}
 
 	compiler := NewHermesCompiler(executor, logger)
-	if err := compiler.Compile(config.HermescPath, result.BundlePath, result.SourcemapPath, extraFlags); err != nil {
+	if err := compiler.Compile(config.HermescPath, result.BundlePath, extraFlags); err != nil {
 		return err
 	}
 	result.HermesApplied = true

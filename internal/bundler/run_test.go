@@ -33,7 +33,6 @@ func TestRunWithExecutor(t *testing.T) {
 			Platform:   PlatformIOS,
 			ProjectDir: dir,
 			OutputDir:  outputDir,
-			Sourcemap:  false,
 			HermesMode: HermesModeOff,
 		}
 
@@ -97,7 +96,6 @@ func TestRunWithExecutor(t *testing.T) {
 			Platform:   PlatformIOS,
 			ProjectDir: dir,
 			OutputDir:  outputDir,
-			Sourcemap:  false,
 			HermesMode: HermesModeOn,
 		}
 
@@ -144,7 +142,6 @@ func TestRunWithExecutor(t *testing.T) {
 			OutputDir:   outputDir,
 			EntryFile:   "custom-entry.js",
 			MetroConfig: filepath.Join(dir, "custom.config.js"),
-			Sourcemap:   false,
 			HermesMode:  HermesModeOff,
 		}
 
@@ -191,7 +188,6 @@ func TestRunWithExecutor(t *testing.T) {
 			Platform:   PlatformIOS,
 			ProjectDir: dir,
 			OutputDir:  "",
-			Sourcemap:  false,
 			HermesMode: HermesModeOff,
 		}
 
@@ -222,7 +218,6 @@ func TestRunWithExecutor(t *testing.T) {
 			Platform:   PlatformIOS,
 			ProjectDir: dir,
 			OutputDir:  filepath.Join(dir, "output"),
-			Sourcemap:  false,
 			HermesMode: "",
 		}
 
@@ -256,7 +251,6 @@ func TestRunWithExecutor(t *testing.T) {
 			Platform:   PlatformIOS,
 			ProjectDir: dir,
 			OutputDir:  outputDir,
-			Sourcemap:  false,
 			HermesMode: HermesModeOff,
 		}
 
