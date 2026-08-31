@@ -67,8 +67,7 @@ inputs:
     description: |-
       The UUID of the Bitrise CodePush app this update targets.
 
-      Find this on your app's CodePush page, or via `CODEPUSH_APP_ID` if you already export it
-      as a Workflow env var.
+      Find this on your app's CodePush page.
     is_required: true
 
 - deployment:
