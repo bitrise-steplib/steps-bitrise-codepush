@@ -60,7 +60,7 @@ inputs:
     - android
     is_required: true
 
-- app_id: $CODEPUSH_APP_ID
+- app_id:
   opts:
     title: CodePush app ID
     summary: The Bitrise CodePush app UUID to work with.
