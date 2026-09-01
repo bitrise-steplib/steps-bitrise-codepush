@@ -10,8 +10,8 @@ description: |-
      **Skip dependency install** unchecked and let the Step run the install for you).
   2. Set **Target platform** to `ios` or `android`. Each run only bundles and publishes for one
      platform; to update both iOS and Android, add the Step twice, once per platform.
-  3. Set **CodePush app ID** and **Deployment** (name, e.g. `Staging`, or UUID) for the app you're
-     publishing to.
+  3. Set **Release Management app ID** and **Deployment** (name, e.g. `Staging`, or UUID) for the
+     app you're publishing to.
   4. Set **Target app version** to the native app version this update targets (e.g. `1.2.0`).
   5. Set **Bitrise API token** as a [Secret](https://devcenter.bitrise.io/en/builds/env-vars-and-secrets/adding-and-managing-secrets.html).
   6. Optionally set **Rollout percentage**, **Mandatory update**, and **Disable after upload** to
@@ -60,15 +60,14 @@ inputs:
     - android
     is_required: true
 
-- app_id: $CODEPUSH_APP_ID
+- app_id:
   opts:
-    title: CodePush app ID
-    summary: The Bitrise CodePush app UUID to work with.
+    title: Release Management app ID
+    summary: The Release Management app UUID to work with.
     description: |-
-      The UUID of the Bitrise CodePush app this update targets.
+      The UUID of the Release Management app (with CodePush enabled) this update targets.
 
-      Find this on your app's CodePush page, or via `CODEPUSH_APP_ID` if you already export it
-      as a Workflow env var.
+      Find this on your Release Management app's CodePush page.
     is_required: true
 
 - deployment:

@@ -16,8 +16,8 @@ over-the-air (OTA) update to a Bitrise CodePush deployment.
    **Skip dependency install** unchecked and let the Step run the install for you).
 2. Set **Target platform** to `ios` or `android`. Each run only bundles and publishes for one
    platform; to update both iOS and Android, add the Step twice, once per platform.
-3. Set **CodePush app ID** and **Deployment** (name, e.g. `Staging`, or UUID) for the app you're
-   publishing to.
+3. Set **Release Management app ID** and **Deployment** (name, e.g. `Staging`, or UUID) for the
+   app you're publishing to.
 4. Set **Target app version** to the native app version this update targets (e.g. `1.2.0`).
 5. Set **Bitrise API token** as a [Secret](https://devcenter.bitrise.io/en/builds/env-vars-and-secrets/adding-and-managing-secrets.html).
 6. Optionally set **Rollout percentage**, **Mandatory update**, and **Disable after upload** to
@@ -52,7 +52,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
 | `platform` | The platform the JavaScript bundle and update target.  Each run of the Step bundles for a single platform (the bundle filename and entry file differ between iOS and Android). | required | `ios` |
-| `app_id` | The UUID of the Bitrise CodePush app this update targets.  Find this on your app's CodePush page, or via `CODEPUSH_APP_ID` if you already export it as a Workflow env var. | required | `$CODEPUSH_APP_ID` |
+| `app_id` | The UUID of the Release Management app (with CodePush enabled) this update targets.  Find this on your Release Management app's CodePush page. | required |  |
 | `deployment` | The name (e.g. `Staging`, `Production`) or UUID of the deployment to work with. | required |  |
 | `api_token` | A Bitrise API access token with access to the app above.  Prefer a **Workspace API token**: unlike a personal access token, it isn't tied to any one team member's account, so it keeps working if that person leaves or their access changes. A **Personal Access Token** (generated under **Account Settings > Security** on [bitrise.io](https://app.bitrise.io/me/account/security)) also works, but ties this Step's ability to publish updates to that individual's account. | required, sensitive |  |
 | `app_version` | The target native binary version(s) this update applies to. This is usually your app's marketing/short version string, not the build number.  Accepts an exact version or a range expression:  - Exact version: `1.2.3` — only devices on that exact binary version. - Wildcard: `*` — any device, regardless of binary version. - Partial version: `1.2.x` or `1.2` — any patch version within that major.minor (`1.2` is   equivalent to `>=1.2.0 <1.3.0`). - Range: `1.2.3 - 1.2.7` (inclusive-inclusive) or `>=1.2.3 <1.2.7` (inclusive-exclusive). - Semver operators: `~1.2.3` (equivalent to `>=1.2.3 <1.3.0`), `^1.2.3` (equivalent to   `>=1.2.3 <2.0.0`).  See [Target versions](https://docs.bitrise.io/en/release-management/codepush/creating-and-releasing-codepush-updates#target-versions) for the full reference. | required |  |
