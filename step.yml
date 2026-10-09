@@ -14,7 +14,9 @@ description: |-
      app you're publishing to.
   4. Set **Target app version** to the native app version this update targets (e.g. `1.2.0`).
   5. Set **Bitrise API token** as a [Secret](https://devcenter.bitrise.io/en/builds/env-vars-and-secrets/adding-and-managing-secrets.html).
-  6. Optionally set **Rollout percentage**, **Mandatory update**, and **Disable after upload** to
+  6. Optionally set **Code signing private key path** to sign the update. Add the private key as a
+     Secret File and reference it here.
+  7. Optionally set **Rollout percentage**, **Mandatory update**, and **Disable after upload** to
      control how the update is rolled out.
 
   The Step auto-detects your project's entry file and Hermes bytecode configuration; overrides
@@ -221,6 +223,25 @@ inputs:
     - "true"
     - "false"
     category: Bundling options
+
+- private_key_path:
+  opts:
+    title: Code signing private key path
+    summary: Path to a PEM-encoded RSA private key used to sign the update.
+    description: |-
+      Path to a PEM-encoded RSA private key (PKCS1 or PKCS8). When set, the Step signs the
+      bundle after bundling and before the upload, by adding a `.codepushrelease` file to it.
+      The CodePush SDK in your app verifies this signature with the matching public key.
+
+      Store the key as a **Secret File** on Bitrise and set this input to the file's environment
+      variable, for example `$CODEPUSH_PRIVATE_KEY`.
+
+      Leave empty to publish an unsigned update. Once your app is built with a public key
+      (`CodePushPublicKey`), the SDK rejects unsigned updates.
+
+      See [Code signing](https://github.com/bitrise-io/bitrise-plugins-codepush-cli#code-signing)
+      for how to generate the key pair and add the public key to your app.
+    category: Code signing
 
 - verbose_log: "false"
   opts:

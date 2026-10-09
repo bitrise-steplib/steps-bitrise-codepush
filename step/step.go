@@ -43,6 +43,7 @@ type Config struct {
 	BundleName            string `env:"bundle_name"`
 	HermesMode            string `env:"hermes,opt[auto,on,off]"`
 	SkipDependencyInstall bool   `env:"skip_dependency_install,opt[true,false]"`
+	PrivateKeyPath        string `env:"private_key_path"`
 
 	AppID      string          `env:"app_id,required"`
 	Deployment string          `env:"deployment,required"`
@@ -95,6 +96,13 @@ func (s Step) ProcessConfig() (Config, error) {
 		return Config{}, fmt.Errorf("rollout_percentage must be a number between 0 and 100, got %g", cfg.RolloutPercentage)
 	}
 
+	// Parse the key now so a bad key fails the build before the slow bundling work starts.
+	if cfg.PrivateKeyPath != "" {
+		if err := bundler.ValidatePrivateKey(cfg.PrivateKeyPath); err != nil {
+			return Config{}, fmt.Errorf("invalid private_key_path: %w", err)
+		}
+	}
+
 	stepconf.Print(cfg)
 	s.logger.Println()
 
@@ -134,6 +142,16 @@ func (s Step) Run(cfg Config) (Result, error) {
 	s.logger.Donef("Bundle created at %s", bundleResult.OutputDir)
 	if bundleResult.HermesApplied {
 		s.logger.Printf("Hermes bytecode compilation applied")
+	}
+
+	if cfg.PrivateKeyPath != "" {
+		s.logger.Println()
+		s.logger.Infof("Signing bundle")
+		s.logger.Printf("Signing bundle with key at %s", cfg.PrivateKeyPath)
+		if err := bundler.SignBundleForStep(bundleResult.OutputDir, cfg.PrivateKeyPath); err != nil {
+			return Result{}, fmt.Errorf("signing bundle: %w", err)
+		}
+		s.logger.Donef("Bundle signed")
 	}
 
 	s.logger.Println()
